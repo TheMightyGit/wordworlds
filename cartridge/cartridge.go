@@ -4,6 +4,8 @@ import (
 	"embed"
 	"image"
 
+	"github.com/TheMightyGit/wordworlds/dictionary"
+
 	"github.com/TheMightyGit/marv/marvlib"
 	"github.com/TheMightyGit/marv/marvtypes"
 )
@@ -62,6 +64,10 @@ func Start() {
 	spriteUI.Show(GfxBankGfx, api.MapBanksGet(MapBankGfx).GetArea(MapAreaUI))
 
 	api.SpritesSort()
+
+	for _, w := range dictionary.Dictionary.Words() {
+		api.ConsolePrintln(w)
+	}
 }
 
 func Update() {
