@@ -51,6 +51,7 @@ type letterGfx [4]image.Point
 
 var (
 	letters = map[rune]letterGfx{
+		' ': letterGfx{{X: 0, Y: 0}, {X: 0, Y: 0}, {X: 0, Y: 0}, {X: 0, Y: 0}},
 		'A': letterGfx{{X: 0, Y: 19}, {X: 1, Y: 19}, {X: 0, Y: 20}, {X: 1, Y: 20}},
 		'B': letterGfx{{X: 2, Y: 19}, {X: 3, Y: 19}, {X: 2, Y: 20}, {X: 3, Y: 20}},
 		'C': letterGfx{{X: 4, Y: 19}, {X: 5, Y: 19}, {X: 4, Y: 20}, {X: 5, Y: 20}},

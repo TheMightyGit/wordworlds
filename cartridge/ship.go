@@ -134,7 +134,7 @@ func (b *LetterButton) Start() {
 
 func (b *LetterButton) Update() {
 	if b.clicked {
-		b.letter = 'C'
+		b.letter = ' '
 		drawRune(b.area, b.tilePos, b.letter)
 		b.clicked = false
 	}
