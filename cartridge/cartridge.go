@@ -36,6 +36,8 @@ const (
 	SpriteUI
 	SpriteButtonLetters
 	SpriteGuessWord
+
+	SpriteMousePointer = 127
 )
 
 var (
@@ -45,9 +47,11 @@ var (
 	spriteUI            marvtypes.Sprite
 	spriteButtonLetters marvtypes.Sprite
 	spriteGuessWord     marvtypes.Sprite
+	spriteMousePointer  marvtypes.Sprite
 
 	buttonLettersArea marvtypes.MapBankArea
 	guessWordArea     marvtypes.MapBankArea
+	mousePointerArea  marvtypes.MapBankArea
 
 	api = marvlib.API
 )
@@ -122,6 +126,12 @@ func Start() {
 	pos = image.Point{0, 0}
 	drawText(guessWordArea, pos, "SOMEWORD", 2)
 
+	spriteMousePointer = api.SpritesGet(SpriteMousePointer)
+	spriteMousePointer.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{10, 10}})
+	mousePointerArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{1, 1})
+	mousePointerArea.Set(image.Point{}, 1, 0, 0, 0)
+	spriteMousePointer.Show(GfxBankGfx, mousePointerArea)
+
 	api.SpritesSort()
 
 	/*
@@ -140,6 +150,8 @@ func Update() {
 	spriteStars.ChangePos(image.Rectangle{starsOffset, image.Point{320, 200}})
 	starsOffset.Y = -50 + int(math.Sin(cnt)*5)
 	cnt += 0.05
+
+	spriteMousePointer.ChangePos(image.Rectangle{api.InputMousePos(), image.Point{10, 10}})
 }
 
 func drawText(area marvtypes.MapBankArea, pos image.Point, txt string, spacing int) {
