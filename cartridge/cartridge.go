@@ -98,7 +98,6 @@ func Start() {
 		api.SpritesGet(SpritePanels),
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaPanels),
 		api.SpritesGet(SpriteUI),
-		api.MapBanksGet(MapBankGfx).GetArea(MapAreaUI),
 	)
 
 	pointer = NewPointer(

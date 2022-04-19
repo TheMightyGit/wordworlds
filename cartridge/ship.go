@@ -12,7 +12,6 @@ type Ship struct {
 	spritePanels marvtypes.Sprite
 	areaPanels   marvtypes.MapBankArea
 	spriteUI     marvtypes.Sprite
-	areaUI       marvtypes.MapBankArea
 
 	spriteButtonLetters marvtypes.Sprite
 	spriteGuessWord     marvtypes.Sprite
@@ -30,7 +29,6 @@ func NewShip(
 	spritePanels marvtypes.Sprite,
 	areaPanels marvtypes.MapBankArea,
 	spriteUI marvtypes.Sprite,
-	areaUI marvtypes.MapBankArea,
 ) *Ship {
 	return &Ship{
 		spriteShip:   spriteShip,
@@ -38,18 +36,17 @@ func NewShip(
 		spritePanels: spritePanels,
 		areaPanels:   areaPanels,
 		spriteUI:     spriteUI,
-		areaUI:       areaUI,
 	}
 }
 
 func (s *Ship) Start() {
 	s.spriteShip = api.SpritesGet(SpriteShip)
 	s.spriteShip.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{320, 200}})
-	s.spriteShip.Show(GfxBankGfx, api.MapBanksGet(MapBankGfx).GetArea(MapAreaShip))
+	s.spriteShip.Show(GfxBankGfx, s.areaShip)
 
 	s.spritePanels = api.SpritesGet(SpritePanels)
 	s.spritePanels.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{320, 200}})
-	s.spritePanels.Show(GfxBankGfx, api.MapBanksGet(MapBankGfx).GetArea(MapAreaPanels))
+	s.spritePanels.Show(GfxBankGfx, s.areaPanels)
 
 	s.spriteUI = api.SpritesGet(SpriteUI)
 	s.spriteUI.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{320, 200}})
