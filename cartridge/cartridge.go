@@ -3,7 +3,6 @@ package cartridge
 import (
 	"embed"
 	"image"
-	"math"
 
 	"github.com/TheMightyGit/marv/marvlib"
 	"github.com/TheMightyGit/marv/marvtypes"
@@ -41,19 +40,18 @@ const (
 )
 
 var (
-	spriteStars         marvtypes.Sprite
-	spriteShip          marvtypes.Sprite
-	spritePanels        marvtypes.Sprite
-	spriteUI            marvtypes.Sprite
 	spriteButtonLetters marvtypes.Sprite
 	spriteGuessWord     marvtypes.Sprite
-	spriteMousePointer  marvtypes.Sprite
 
 	buttonLettersArea marvtypes.MapBankArea
 	guessWordArea     marvtypes.MapBankArea
 	mousePointerArea  marvtypes.MapBankArea
 
 	api = marvlib.API
+
+	stars   *Stars
+	ship    *Ship
+	pointer *Pointer
 )
 
 type letterGfx [4]image.Point
@@ -90,21 +88,21 @@ var (
 )
 
 func Start() {
-	spriteStars = api.SpritesGet(SpriteStars)
-	spriteStars.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{320, 200}})
-	spriteStars.Show(GfxBankGfx, api.MapBanksGet(MapBankGfx).GetArea(MapAreaStars))
+	pointer = NewPointer(
+		api.SpritesGet(SpriteMousePointer),
+		api.MapBanksGet(MapBankGfx).AllocArea(image.Point{1, 1}),
+	)
 
-	spriteShip = api.SpritesGet(SpriteShip)
-	spriteShip.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{320, 200}})
-	spriteShip.Show(GfxBankGfx, api.MapBanksGet(MapBankGfx).GetArea(MapAreaShip))
+	stars = NewStars(api.SpritesGet(SpriteStars), api.MapBanksGet(MapBankGfx).GetArea(MapAreaStars))
 
-	spritePanels = api.SpritesGet(SpritePanels)
-	spritePanels.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{320, 200}})
-	spritePanels.Show(GfxBankGfx, api.MapBanksGet(MapBankGfx).GetArea(MapAreaPanels))
-
-	spriteUI = api.SpritesGet(SpriteUI)
-	spriteUI.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{320, 200}})
-	spriteUI.Show(GfxBankGfx, api.MapBanksGet(MapBankGfx).GetArea(MapAreaUI))
+	ship = NewShip(
+		api.SpritesGet(SpriteShip),
+		api.MapBanksGet(MapBankGfx).GetArea(MapAreaShip),
+		api.SpritesGet(SpritePanels),
+		api.MapBanksGet(MapBankGfx).GetArea(MapAreaPanels),
+		api.SpritesGet(SpriteUI),
+		api.MapBanksGet(MapBankGfx).GetArea(MapAreaUI),
+	)
 
 	spriteButtonLetters = api.SpritesGet(SpriteButtonLetters)
 	spriteButtonLetters.ChangePos(image.Rectangle{image.Point{5 + (4 * 10), 5 + (11 * 10)}, image.Point{8 * 30, 30 * 3}})
@@ -126,32 +124,23 @@ func Start() {
 	pos = image.Point{0, 0}
 	drawText(guessWordArea, pos, "SOMEWORD", 2)
 
-	spriteMousePointer = api.SpritesGet(SpriteMousePointer)
-	spriteMousePointer.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{10, 10}})
-	mousePointerArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{1, 1})
-	mousePointerArea.Set(image.Point{}, 1, 0, 0, 0)
-	spriteMousePointer.Show(GfxBankGfx, mousePointerArea)
-
-	api.SpritesSort()
-
 	/*
 		for _, w := range dictionary.Dictionary.Words() {
 			api.ConsolePrintln(w)
 		}
 	*/
+
+	stars.Start()
+	ship.Start()
+	pointer.Start()
+
+	api.SpritesSort()
 }
 
-var (
-	starsOffset image.Point
-	cnt         float64
-)
-
 func Update() {
-	spriteStars.ChangePos(image.Rectangle{starsOffset, image.Point{320, 200}})
-	starsOffset.Y = -50 + int(math.Sin(cnt)*5)
-	cnt += 0.05
-
-	spriteMousePointer.ChangePos(image.Rectangle{api.InputMousePos(), image.Point{10, 10}})
+	stars.Update()
+	ship.Update()
+	pointer.Update()
 }
 
 func drawText(area marvtypes.MapBankArea, pos image.Point, txt string, spacing int) {
