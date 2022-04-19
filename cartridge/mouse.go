@@ -6,15 +6,21 @@ import (
 	"github.com/TheMightyGit/marv/marvtypes"
 )
 
-type Pointer struct {
-	sprite marvtypes.Sprite
-	area   marvtypes.MapBankArea
+type Clickable interface {
+	OnClick(image.Point) bool
 }
 
-func NewPointer(sprite marvtypes.Sprite, area marvtypes.MapBankArea) *Pointer {
+type Pointer struct {
+	sprite     marvtypes.Sprite
+	area       marvtypes.MapBankArea
+	clickables []Clickable
+}
+
+func NewPointer(sprite marvtypes.Sprite, area marvtypes.MapBankArea, clickables ...Clickable) *Pointer {
 	return &Pointer{
-		sprite: sprite,
-		area:   area,
+		sprite:     sprite,
+		area:       area,
+		clickables: clickables,
 	}
 }
 
@@ -26,5 +32,14 @@ func (s *Pointer) Start() {
 }
 
 func (s *Pointer) Update() {
-	s.sprite.ChangePos(image.Rectangle{api.InputMousePos(), image.Point{10, 10}})
+	pos := api.InputMousePos()
+	s.sprite.ChangePos(image.Rectangle{pos, image.Point{10, 10}})
+
+	if api.InputMousePressed() {
+		for _, clickable := range s.clickables {
+			if clickable.OnClick(pos) {
+				break
+			}
+		}
+	}
 }

@@ -40,12 +40,6 @@ const (
 )
 
 var (
-	spriteButtonLetters marvtypes.Sprite
-	spriteGuessWord     marvtypes.Sprite
-
-	buttonLettersArea marvtypes.MapBankArea
-	guessWordArea     marvtypes.MapBankArea
-
 	api = marvlib.API
 
 	stars   *Stars
@@ -86,12 +80,12 @@ var (
 	}
 )
 
-func Start() {
-	pointer = NewPointer(
-		api.SpritesGet(SpriteMousePointer),
-		api.MapBanksGet(MapBankGfx).AllocArea(image.Point{1, 1}),
-	)
+type Updateable interface {
+	Start()
+	Update()
+}
 
+func Start() {
 	stars = NewStars(
 		api.SpritesGet(SpriteStars),
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaStars),
@@ -106,25 +100,11 @@ func Start() {
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaUI),
 	)
 
-	spriteButtonLetters = api.SpritesGet(SpriteButtonLetters)
-	spriteButtonLetters.ChangePos(image.Rectangle{image.Point{5 + (4 * 10), 5 + (11 * 10)}, image.Point{8 * 30, 30 * 3}})
-	buttonLettersArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{8 * 3, 3 * 3})
-	spriteButtonLetters.Show(GfxBankGfx, buttonLettersArea)
-
-	pos := image.Point{0, 0}
-	drawText(buttonLettersArea, pos, "ABCDEFGH", 3)
-	pos = image.Point{0, 3}
-	drawText(buttonLettersArea, pos, "IJKLMNOP", 3)
-	pos = image.Point{0, 6}
-	drawText(buttonLettersArea, pos, "QRSTUVWX", 3)
-
-	spriteGuessWord = api.SpritesGet(SpriteGuessWord)
-	spriteGuessWord.ChangePos(image.Rectangle{image.Point{80, 80}, image.Point{30 * 16, 30}})
-	guessWordArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{16 * 2, 2})
-	spriteGuessWord.Show(GfxBankGfx, guessWordArea)
-
-	pos = image.Point{0, 0}
-	drawText(guessWordArea, pos, "SOMEWORD", 2)
+	pointer = NewPointer(
+		api.SpritesGet(SpriteMousePointer),
+		api.MapBanksGet(MapBankGfx).AllocArea(image.Point{1, 1}),
+		ship,
+	)
 
 	/*
 		for _, w := range dictionary.Dictionary.Words() {
@@ -147,10 +127,14 @@ func Update() {
 
 func drawText(area marvtypes.MapBankArea, pos image.Point, txt string, spacing int) {
 	for _, letter := range txt {
-		area.Set(pos.Add(image.Point{0, 0}), uint8(letters[letter][0].X), uint8(letters[letter][0].Y), 0, 0)
-		area.Set(pos.Add(image.Point{1, 0}), uint8(letters[letter][1].X), uint8(letters[letter][1].Y), 0, 0)
-		area.Set(pos.Add(image.Point{0, 1}), uint8(letters[letter][2].X), uint8(letters[letter][2].Y), 0, 0)
-		area.Set(pos.Add(image.Point{1, 1}), uint8(letters[letter][3].X), uint8(letters[letter][3].Y), 0, 0)
+		drawRune(area, pos, letter)
 		pos = pos.Add(image.Point{spacing, 0})
 	}
+}
+
+func drawRune(area marvtypes.MapBankArea, pos image.Point, letter rune) {
+	area.Set(pos.Add(image.Point{0, 0}), uint8(letters[letter][0].X), uint8(letters[letter][0].Y), 0, 0)
+	area.Set(pos.Add(image.Point{1, 0}), uint8(letters[letter][1].X), uint8(letters[letter][1].Y), 0, 0)
+	area.Set(pos.Add(image.Point{0, 1}), uint8(letters[letter][2].X), uint8(letters[letter][2].Y), 0, 0)
+	area.Set(pos.Add(image.Point{1, 1}), uint8(letters[letter][3].X), uint8(letters[letter][3].Y), 0, 0)
 }
