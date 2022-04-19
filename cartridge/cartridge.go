@@ -45,7 +45,6 @@ var (
 
 	buttonLettersArea marvtypes.MapBankArea
 	guessWordArea     marvtypes.MapBankArea
-	mousePointerArea  marvtypes.MapBankArea
 
 	api = marvlib.API
 
@@ -93,7 +92,10 @@ func Start() {
 		api.MapBanksGet(MapBankGfx).AllocArea(image.Point{1, 1}),
 	)
 
-	stars = NewStars(api.SpritesGet(SpriteStars), api.MapBanksGet(MapBankGfx).GetArea(MapAreaStars))
+	stars = NewStars(
+		api.SpritesGet(SpriteStars),
+		api.MapBanksGet(MapBankGfx).GetArea(MapAreaStars),
+	)
 
 	ship = NewShip(
 		api.SpritesGet(SpriteShip),
