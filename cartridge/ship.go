@@ -50,7 +50,8 @@ func (s *Ship) Start() {
 
 	s.spriteUI = api.SpritesGet(SpriteUI)
 	s.spriteUI.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{320, 200}})
-	s.spriteUI.Show(GfxBankGfx, api.MapBanksGet(MapBankGfx).GetArea(MapAreaUI))
+	uiArea := api.MapBanksGet(MapBankGfx).GetArea(MapAreaUI)
+	s.spriteUI.Show(GfxBankGfx, uiArea)
 
 	spriteButtonLettersOffset := image.Point{5 + (4 * 10), 5 + (11 * 10)}
 	s.spriteButtonLetters = api.SpritesGet(SpriteButtonLetters)
@@ -67,7 +68,11 @@ func (s *Ship) Start() {
 			}
 			hitBox = hitBox.Add(spriteButtonLettersOffset)
 			hitBox = hitBox.Sub(image.Point{5, 5})
-			button := NewLetterButton(s.buttonLettersArea, pos, letter, hitBox)
+
+			buttonArea := s.buttonLettersArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{2, 2})})
+			buttonBgArea := uiArea.GetSubArea(image.Rectangle{pos.Add(image.Point{4, 11}), pos.Add(image.Point{4 + 3, 11 + 3})})
+
+			button := NewLetterButton(buttonArea, buttonBgArea, letter, hitBox)
 			s.updateables = append(s.updateables, button)
 			s.clickables = append(s.clickables, button)
 			pos = pos.Add(image.Point{3, 0})
@@ -105,7 +110,7 @@ func (s *Ship) OnClick(pos image.Point) bool {
 
 type LetterButton struct {
 	area    marvtypes.MapBankArea
-	tilePos image.Point
+	bgArea  marvtypes.MapBankArea
 	letter  rune
 	hitBox  image.Rectangle
 	clicked bool
@@ -113,26 +118,40 @@ type LetterButton struct {
 
 func NewLetterButton(
 	area marvtypes.MapBankArea,
-	tilePos image.Point,
+	bgArea marvtypes.MapBankArea,
 	letter rune,
 	hitBox image.Rectangle,
 ) *LetterButton {
 	return &LetterButton{
-		area:    area,
-		tilePos: tilePos,
-		letter:  letter,
-		hitBox:  hitBox,
+		area:   area,
+		bgArea: bgArea,
+		letter: letter,
+		hitBox: hitBox,
 	}
 }
 
 func (b *LetterButton) Start() {
-	drawRune(b.area, b.tilePos, b.letter)
+	drawRune(b.area, image.Point{}, b.letter)
 }
 
 func (b *LetterButton) Update() {
 	if b.clicked {
-		b.letter = ' '
-		drawRune(b.area, b.tilePos, b.letter)
+		// b.letter = 'X'
+		// drawRune(b.area, image.Point{}, b.letter)
+		b.bgArea.DrawBox(
+			image.Rectangle{image.Point{}, image.Point{2, 2}},
+			&[9]image.Point{
+				{0, 11},
+				{1, 11},
+				{2, 11},
+				{0, 12},
+				{1, 12},
+				{2, 12},
+				{0, 13},
+				{1, 13},
+				{2, 13},
+			},
+			0, 0)
 		b.clicked = false
 	}
 }
