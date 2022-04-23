@@ -79,6 +79,9 @@ var (
 		'Y': letterGfx{{X: 0, Y: 23}, {X: 1, Y: 23}, {X: 0, Y: 24}, {X: 1, Y: 24}},
 		'Z': letterGfx{{X: 2, Y: 23}, {X: 3, Y: 23}, {X: 2, Y: 24}, {X: 3, Y: 24}},
 		'-': letterGfx{{X: 4, Y: 23}, {X: 5, Y: 23}, {X: 4, Y: 24}, {X: 5, Y: 24}},
+		//
+		'd': letterGfx{{X: 20, Y: 23}, {X: 21, Y: 23}, {X: 20, Y: 24}, {X: 21, Y: 24}}, // DEL icon
+		'o': letterGfx{{X: 22, Y: 23}, {X: 23, Y: 23}, {X: 22, Y: 24}, {X: 23, Y: 24}}, // OK icon
 	}
 )
 

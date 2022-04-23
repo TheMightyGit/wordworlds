@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/TheMightyGit/marv/marvtypes"
+	"github.com/TheMightyGit/wordworlds/dictionary"
 )
 
 type Ship struct {
@@ -112,6 +113,17 @@ func (s *Ship) Start() {
 		pos = pos.Add(image.Point{-(3 * len(letterRow)), 3})
 	}
 
+	okHitPos := image.Point{290, 120}
+	okHitBox := image.Rectangle{okHitPos, okHitPos.Add(image.Point{30, 30})}
+	pos = image.Point{29, 12}
+	okButtonArea := s.buttonLettersArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{2, 2})})
+	okButtonBgArea := uiArea.GetSubArea(image.Rectangle{pos.Add(image.Point{4, 11}), pos.Add(image.Point{4 + 3, 11 + 3})})
+	okButton := NewLetterButton(okButtonArea, okButtonBgArea, 'o', okHitBox, func(lb *LetterButton) {
+		api.ConsolePrintln("OK!")
+	}, darkGreenBox, brightGreenBox)
+	s.updateables = append(s.updateables, okButton)
+	s.clickables = append(s.clickables, okButton)
+
 	s.spriteGuessWord = api.SpritesGet(SpriteGuessWord)
 	s.spriteGuessWord.ChangePos(image.Rectangle{image.Point{0, 78}, image.Point{320, 30}})
 	s.guessWordArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{32, 2})
@@ -170,11 +182,17 @@ func (s *Ship) updateGuessWord() {
 	if pad < 0 {
 		pad = 0
 	}
-	word = strings.Repeat(" ", pad) + word
+	paddedWord := strings.Repeat(" ", pad) + word
 
 	s.guessWordArea.Clear(0, 0)
 	pos := image.Point{0, 0}
-	drawText(s.guessWordArea, pos, word, 2)
+	drawText(s.guessWordArea, pos, paddedWord, 2)
+
+	if dictionary.Dictionary.ContainsWord(word) {
+		api.ConsolePrintln(word, " VALID")
+	} else {
+		api.ConsolePrintln(word, " INVALID")
+	}
 }
 
 var (
