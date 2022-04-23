@@ -2,7 +2,6 @@ package cartridge
 
 import (
 	"image"
-	"math/rand"
 	"strings"
 
 	"github.com/TheMightyGit/marv/marvtypes"
@@ -16,16 +15,20 @@ type Ship struct {
 	areaPanels   marvtypes.MapBankArea
 	spriteUI     marvtypes.Sprite
 
-	spriteButtonLetters marvtypes.Sprite
-	spriteGuessWord     marvtypes.Sprite
+	spriteButtonIcons marvtypes.Sprite
+	spriteGuessWord   marvtypes.Sprite
 
-	buttonLettersArea marvtypes.MapBankArea
-	guessWordArea     marvtypes.MapBankArea
+	buttonIconsArea marvtypes.MapBankArea
+	guessWordArea   marvtypes.MapBankArea
+	uiArea          marvtypes.MapBankArea
 
 	clickables  []Clickable
 	updateables []Updateable
 
 	selectedLetterButtons []*LetterButton
+
+	okButton  *LetterButton
+	delButton *LetterButton
 }
 
 func NewShip(
@@ -55,16 +58,17 @@ func (s *Ship) Start() {
 
 	s.spriteUI = api.SpritesGet(SpriteUI)
 	s.spriteUI.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{320, 200}})
-	uiArea := api.MapBanksGet(MapBankGfx).GetArea(MapAreaUI)
-	s.spriteUI.Show(GfxBankGfx, uiArea)
+	s.uiArea = api.MapBanksGet(MapBankGfx).GetArea(MapAreaUI)
+	s.spriteUI.Show(GfxBankGfx, s.uiArea)
 
-	spriteButtonLettersOffset := image.Point{5 + (4 * 10), 5 + (11 * 10)}
-	s.spriteButtonLetters = api.SpritesGet(SpriteButtonLetters)
-	s.spriteButtonLetters.ChangePos(image.Rectangle{spriteButtonLettersOffset, image.Point{8 * 30, 30 * 3}})
-	s.buttonLettersArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{8 * 3, 3 * 3})
-	s.spriteButtonLetters.Show(GfxBankGfx, s.buttonLettersArea)
+	s.buttonIconsArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{32, 20}) // full screen
 
-	pos := image.Point{0, 0}
+	s.spriteButtonIcons = api.SpritesGet(SpriteButtonLetters)
+	s.spriteButtonIcons.ChangePos(image.Rectangle{image.Point{5, 5}, image.Point{320 - 5, 200 - 5}})
+	s.spriteButtonIcons.Show(GfxBankGfx, s.buttonIconsArea)
+	spriteButtonLettersOffset := image.Point{40, 110}
+
+	pos := image.Point{4, 11}
 	for rowIdx, letterRow := range []string{"--------", "--------", "--------"} {
 		for letterIdx := range letterRow {
 			hitBox := image.Rectangle{
@@ -72,10 +76,9 @@ func (s *Ship) Start() {
 				image.Point{(30 * letterIdx) + 30, (30 * rowIdx) + 30},
 			}
 			hitBox = hitBox.Add(spriteButtonLettersOffset)
-			hitBox = hitBox.Sub(image.Point{5, 5})
 
-			buttonArea := s.buttonLettersArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{2, 2})})
-			buttonBgArea := uiArea.GetSubArea(image.Rectangle{pos.Add(image.Point{4, 11}), pos.Add(image.Point{4 + 3, 11 + 3})})
+			buttonArea := s.buttonIconsArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{2, 2})})
+			buttonBgArea := s.uiArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{3, 3})})
 
 			darkBox := darkRedBox
 			brightBox := brightRedBox
@@ -88,7 +91,7 @@ func (s *Ship) Start() {
 				brightBox = brightGreenBox
 			}
 
-			button := NewLetterButton(buttonArea, buttonBgArea, randomLetter(), hitBox, func(lb *LetterButton) {
+			button := NewLetterButton(buttonArea, buttonBgArea, dictionary.Dictionary.RandomLetter(), hitBox, func(lb *LetterButton) {
 				if lb.disabled {
 					// remove from letter list
 					newSelectedLetterButtons := []*LetterButton{}
@@ -113,44 +116,19 @@ func (s *Ship) Start() {
 		pos = pos.Add(image.Point{-(3 * len(letterRow)), 3})
 	}
 
-	okHitPos := image.Point{290, 120}
-	okHitBox := image.Rectangle{okHitPos, okHitPos.Add(image.Point{30, 30})}
-	pos = image.Point{29, 12}
-	okButtonArea := s.buttonLettersArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{2, 2})})
-	okButtonBgArea := uiArea.GetSubArea(image.Rectangle{pos.Add(image.Point{4, 11}), pos.Add(image.Point{4 + 3, 11 + 3})})
-	okButton := NewLetterButton(okButtonArea, okButtonBgArea, 'o', okHitBox, func(lb *LetterButton) {
-		api.ConsolePrintln("OK!")
-	}, darkGreenBox, brightGreenBox)
-	s.updateables = append(s.updateables, okButton)
-	s.clickables = append(s.clickables, okButton)
+	s.okButton = s.addOkButton()
+	s.delButton = s.addDelButton()
 
 	s.spriteGuessWord = api.SpritesGet(SpriteGuessWord)
 	s.spriteGuessWord.ChangePos(image.Rectangle{image.Point{0, 78}, image.Point{320, 30}})
 	s.guessWordArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{32, 2})
 	s.spriteGuessWord.Show(GfxBankGfx, s.guessWordArea)
 
-	/*
-		var timer *time.Timer
-		timer = time.AfterFunc(
-			time.Second*2,
-			func() {
-				s.guessWordArea.Clear(0, 0)
-				pos = image.Point{0, 0}
-				word := dictionary.Dictionary.RandomWord()
-				pad := (16 - len(word)) / 2
-				if pad < 0 {
-					pad = 0
-				}
-				word = strings.Repeat(" ", pad) + word
-				drawText(s.guessWordArea, pos, word, 2)
-				timer.Reset(time.Second * 2)
-			},
-		)
-	*/
-
 	for _, updateable := range s.updateables {
 		updateable.Start()
 	}
+
+	s.updateGuessWord()
 }
 
 func (s *Ship) Update() {
@@ -185,22 +163,68 @@ func (s *Ship) updateGuessWord() {
 	paddedWord := strings.Repeat(" ", pad) + word
 
 	s.guessWordArea.Clear(0, 0)
-	pos := image.Point{0, 0}
-	drawText(s.guessWordArea, pos, paddedWord, 2)
+	if len(word) > 0 {
+		pos := image.Point{0, 0}
+		drawText(s.guessWordArea, pos, paddedWord, 2)
 
-	if dictionary.Dictionary.ContainsWord(word) {
-		api.ConsolePrintln(word, " VALID")
+		if dictionary.Dictionary.ContainsWord(word) {
+			// api.ConsolePrintln(word, " VALID")
+			s.okButton.letter = 'o'
+		} else {
+			// api.ConsolePrintln(word, " INVALID")
+			s.okButton.letter = ' '
+		}
+
+		s.delButton.letter = 'd'
 	} else {
-		api.ConsolePrintln(word, " INVALID")
+		s.okButton.letter = ' '
+		s.delButton.letter = ' '
 	}
+
+	s.okButton.Start()
+	s.delButton.Start()
 }
 
-var (
-	validLetters = []rune("AABCDEEFGHIIJKLMNOOPQRSTUUVWXYYZ")
-)
+func (s *Ship) addOkButton() *LetterButton {
+	return s.addActionButton(
+		image.Point{29, 16},
+		'o',
+		func(lb *LetterButton) {
+			for _, lb := range s.selectedLetterButtons {
+				lb.letter = dictionary.Dictionary.RandomLetter()
+				lb.Enable()
+				lb.Start()
+			}
+			s.selectedLetterButtons = []*LetterButton{}
+			s.updateGuessWord()
+		},
+	)
+}
 
-func randomLetter() rune {
-	return validLetters[rand.Intn(len(validLetters))]
+func (s *Ship) addDelButton() *LetterButton {
+	return s.addActionButton(
+		image.Point{29, 12},
+		'd',
+		func(lb *LetterButton) {
+			siz := len(s.selectedLetterButtons)
+			if siz > 0 {
+				s.selectedLetterButtons[siz-1].Enable()
+				s.selectedLetterButtons = s.selectedLetterButtons[:siz-1]
+				s.updateGuessWord()
+			}
+		},
+	)
+}
+
+func (s *Ship) addActionButton(pos image.Point, icon rune, onClick func(*LetterButton)) *LetterButton {
+	hitPos := image.Point{pos.X * 10, pos.Y * 10}
+	hitBox := image.Rectangle{hitPos, hitPos.Add(image.Point{30, 30})}
+	buttonArea := s.buttonIconsArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{2, 2})})
+	buttonBgArea := s.uiArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{3, 3})})
+	button := NewLetterButton(buttonArea, buttonBgArea, icon, hitBox, onClick, solidBlueBox, solidBlueBox)
+	s.updateables = append(s.updateables, button)
+	s.clickables = append(s.clickables, button)
+	return button
 }
 
 type LetterButton struct {
@@ -289,6 +313,11 @@ var (
 		{6, 1}, {7, 1}, {8, 1},
 		{6, 2}, {7, 2}, {8, 2},
 		{6, 3}, {7, 3}, {8, 3},
+	}
+	solidBlueBox = &[9]image.Point{
+		{1, 8}, {1, 8}, {1, 8},
+		{1, 8}, {1, 8}, {1, 8},
+		{1, 8}, {1, 8}, {1, 8},
 	}
 )
 
