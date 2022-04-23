@@ -65,6 +65,7 @@ func (d *dict) ContainsWord(word string) bool {
 }
 
 func (d *dict) RandomLetter() rune {
+	// This tends towards the most common letters over time :/
 	pos := rand.Intn(d.lettersFreqTotal)
 	total := 0
 	for _, lf := range d.lettersFreq {
