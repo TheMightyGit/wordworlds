@@ -2,8 +2,11 @@ package cartridge
 
 import (
 	"image"
+	"strings"
+	"time"
 
 	"github.com/TheMightyGit/marv/marvtypes"
+	"github.com/TheMightyGit/wordworlds/dictionary"
 )
 
 type Ship struct {
@@ -81,12 +84,23 @@ func (s *Ship) Start() {
 	}
 
 	s.spriteGuessWord = api.SpritesGet(SpriteGuessWord)
-	s.spriteGuessWord.ChangePos(image.Rectangle{image.Point{80, 80}, image.Point{30 * 16, 30}})
-	s.guessWordArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{16 * 2, 2})
+	s.spriteGuessWord.ChangePos(image.Rectangle{image.Point{0, 78}, image.Point{320, 30}})
+	s.guessWordArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{32, 2})
 	s.spriteGuessWord.Show(GfxBankGfx, s.guessWordArea)
 
-	pos = image.Point{0, 0}
-	drawText(s.guessWordArea, pos, "SOMEWORD", 2)
+	var timer *time.Timer
+	timer = time.AfterFunc(
+		time.Second*2,
+		func() {
+			s.guessWordArea.Clear(0, 0)
+			pos = image.Point{0, 0}
+			word := dictionary.Dictionary.RandomWord()
+			pad := (16 - len(word)) / 2
+			word = strings.Repeat(" ", pad) + word
+			drawText(s.guessWordArea, pos, word, 2)
+			timer.Reset(time.Second * 2)
+		},
+	)
 
 	for _, updateable := range s.updateables {
 		updateable.Start()

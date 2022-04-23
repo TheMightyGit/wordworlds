@@ -2,6 +2,7 @@ package dictionary
 
 import (
 	_ "embed"
+	"math/rand"
 	"strings"
 )
 
@@ -13,18 +14,27 @@ var (
 
 type Dict interface {
 	Words() []string
+	RandomWord() string
 }
 
 func newDict(rawfiledata string) Dict {
+	words := strings.Split(rawfiledata, "\n")
+	for i, w := range words {
+		words[i] = strings.ToUpper(w)
+	}
 	return &dict{
-		rawDictionary: rawfiledata,
+		words: words,
 	}
 }
 
 type dict struct {
-	rawDictionary string
+	words []string
 }
 
 func (d *dict) Words() []string {
-	return strings.Split(d.rawDictionary, "\n")
+	return d.words
+}
+
+func (d *dict) RandomWord() string {
+	return d.words[rand.Intn(len(d.words))]
 }
