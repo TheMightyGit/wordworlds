@@ -96,6 +96,9 @@ func (s *Ship) Start() {
 			pos = image.Point{0, 0}
 			word := dictionary.Dictionary.RandomWord()
 			pad := (16 - len(word)) / 2
+			if pad < 0 {
+				pad = 0
+			}
 			word = strings.Repeat(" ", pad) + word
 			drawText(s.guessWordArea, pos, word, 2)
 			timer.Reset(time.Second * 2)
