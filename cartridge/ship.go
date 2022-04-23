@@ -4,10 +4,8 @@ import (
 	"image"
 	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/TheMightyGit/marv/marvtypes"
-	"github.com/TheMightyGit/wordworlds/dictionary"
 )
 
 type Ship struct {
@@ -25,6 +23,8 @@ type Ship struct {
 
 	clickables  []Clickable
 	updateables []Updateable
+
+	selectedLetterButtons []*LetterButton
 }
 
 func NewShip(
@@ -88,7 +88,22 @@ func (s *Ship) Start() {
 			}
 
 			button := NewLetterButton(buttonArea, buttonBgArea, randomLetter(), hitBox, func(lb *LetterButton) {
-				api.ConsolePrintln(string(lb.letter))
+				if lb.disabled {
+					// remove from letter list
+					newSelectedLetterButtons := []*LetterButton{}
+					for _, b := range s.selectedLetterButtons {
+						if b != lb {
+							newSelectedLetterButtons = append(newSelectedLetterButtons, b)
+						}
+					}
+					s.selectedLetterButtons = newSelectedLetterButtons
+					lb.Enable()
+				} else {
+					// add letter and disable button
+					lb.Disable()
+					s.selectedLetterButtons = append(s.selectedLetterButtons, lb)
+				}
+				s.updateGuessWord()
 			}, darkBox, brightBox)
 			s.updateables = append(s.updateables, button)
 			s.clickables = append(s.clickables, button)
@@ -102,22 +117,24 @@ func (s *Ship) Start() {
 	s.guessWordArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{32, 2})
 	s.spriteGuessWord.Show(GfxBankGfx, s.guessWordArea)
 
-	var timer *time.Timer
-	timer = time.AfterFunc(
-		time.Second*2,
-		func() {
-			s.guessWordArea.Clear(0, 0)
-			pos = image.Point{0, 0}
-			word := dictionary.Dictionary.RandomWord()
-			pad := (16 - len(word)) / 2
-			if pad < 0 {
-				pad = 0
-			}
-			word = strings.Repeat(" ", pad) + word
-			drawText(s.guessWordArea, pos, word, 2)
-			timer.Reset(time.Second * 2)
-		},
-	)
+	/*
+		var timer *time.Timer
+		timer = time.AfterFunc(
+			time.Second*2,
+			func() {
+				s.guessWordArea.Clear(0, 0)
+				pos = image.Point{0, 0}
+				word := dictionary.Dictionary.RandomWord()
+				pad := (16 - len(word)) / 2
+				if pad < 0 {
+					pad = 0
+				}
+				word = strings.Repeat(" ", pad) + word
+				drawText(s.guessWordArea, pos, word, 2)
+				timer.Reset(time.Second * 2)
+			},
+		)
+	*/
 
 	for _, updateable := range s.updateables {
 		updateable.Start()
@@ -137,6 +154,27 @@ func (s *Ship) OnClick(pos image.Point) bool {
 		}
 	}
 	return false
+}
+
+func (s *Ship) getGuessWord() string {
+	word := ""
+	for _, b := range s.selectedLetterButtons {
+		word += string(b.letter)
+	}
+	return word
+}
+
+func (s *Ship) updateGuessWord() {
+	word := s.getGuessWord()
+	pad := (16 - len(word)) / 2
+	if pad < 0 {
+		pad = 0
+	}
+	word = strings.Repeat(" ", pad) + word
+
+	s.guessWordArea.Clear(0, 0)
+	pos := image.Point{0, 0}
+	drawText(s.guessWordArea, pos, word, 2)
 }
 
 var (
@@ -189,11 +227,7 @@ func (b *LetterButton) Start() {
 
 func (b *LetterButton) Update() {
 	if b.clicked {
-		// b.letter = 'X'
-		// drawRune(b.area, image.Point{}, b.letter)
-		b.Disable()
 		b.onClick(b)
-
 		b.clicked = false
 	}
 }
@@ -201,9 +235,7 @@ func (b *LetterButton) Update() {
 func (b *LetterButton) OnClick(pos image.Point) bool {
 	// api.ConsolePrintln(b.letter, b.hitBox, pos)
 	if pos.In(b.hitBox) {
-		if !b.disabled {
-			b.clicked = true
-		}
+		b.clicked = true
 		return true
 	}
 	return false
