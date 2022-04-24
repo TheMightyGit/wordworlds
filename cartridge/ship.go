@@ -25,10 +25,12 @@ type Ship struct {
 	clickables  []Clickable
 	updateables []Updateable
 
+	allLetterButtons      []*LetterButton
 	selectedLetterButtons []*LetterButton
 
-	okButton  *LetterButton
-	delButton *LetterButton
+	okButton      *LetterButton
+	delButton     *LetterButton
+	shuffleButton *LetterButton
 }
 
 func NewShip(
@@ -111,6 +113,7 @@ func (s *Ship) Start() {
 			}, darkBox, brightBox)
 			s.updateables = append(s.updateables, button)
 			s.clickables = append(s.clickables, button)
+			s.allLetterButtons = append(s.allLetterButtons, button)
 			pos = pos.Add(image.Point{3, 0})
 		}
 		pos = pos.Add(image.Point{-(3 * len(letterRow)), 3})
@@ -118,6 +121,7 @@ func (s *Ship) Start() {
 
 	s.okButton = s.addOkButton()
 	s.delButton = s.addDelButton()
+	s.shuffleButton = s.addShuffleButton()
 
 	s.spriteGuessWord = api.SpritesGet(SpriteGuessWord)
 	s.spriteGuessWord.ChangePos(image.Rectangle{image.Point{0, 78}, image.Point{320, 30}})
@@ -190,13 +194,11 @@ func (s *Ship) addOkButton() *LetterButton {
 		image.Point{29, 16},
 		'o',
 		func(lb *LetterButton) {
+			// new letters for used buttons
 			for _, lb := range s.selectedLetterButtons {
-				lb.letter = dictionary.Dictionary.RandomLetter()
-				lb.Enable()
-				lb.Start()
+				lb.Shuffle()
 			}
-			s.selectedLetterButtons = []*LetterButton{}
-			s.updateGuessWord()
+			s.removeGuessWord()
 		},
 	)
 }
@@ -214,6 +216,35 @@ func (s *Ship) addDelButton() *LetterButton {
 			}
 		},
 	)
+}
+
+func (s *Ship) addShuffleButton() *LetterButton {
+	return s.addActionButton(
+		image.Point{0, 12},
+		's',
+		func(lb *LetterButton) {
+			s.shuffleButtons()
+		},
+	)
+}
+
+func (s *Ship) removeGuessWord() {
+	// re-enable associated buttons
+	for _, lb := range s.selectedLetterButtons {
+		lb.Enable()
+	}
+	// remove selected buttons
+	s.selectedLetterButtons = []*LetterButton{}
+	s.updateGuessWord()
+}
+
+func (s *Ship) shuffleButtons() {
+	// only shuffle un-selected buttons
+	for _, lb := range s.allLetterButtons {
+		if !lb.disabled {
+			lb.Shuffle()
+		}
+	}
 }
 
 func (s *Ship) addActionButton(pos image.Point, icon rune, onClick func(*LetterButton)) *LetterButton {
@@ -237,6 +268,8 @@ type LetterButton struct {
 	disabled   bool
 	enabledBg  *[9]image.Point
 	disabledBg *[9]image.Point
+
+	shuffleAnimCountdown int
 }
 
 type LetterButtonOnClickFunc func(*LetterButton)
@@ -268,10 +301,19 @@ func (b *LetterButton) Start() {
 }
 
 func (b *LetterButton) Update() {
-	if b.clicked {
+	if b.shuffleAnimCountdown > 0 {
+		if b.shuffleAnimCountdown%5 == 0 {
+			b.letter = dictionary.Dictionary.RandomLetter()
+			b.Start()
+		}
+		b.shuffleAnimCountdown--
+		if b.shuffleAnimCountdown == 0 {
+			b.Enable()
+		}
+	} else if b.clicked {
 		b.onClick(b)
-		b.clicked = false
 	}
+	b.clicked = false
 }
 
 func (b *LetterButton) OnClick(pos image.Point) bool {
@@ -335,4 +377,9 @@ func (b *LetterButton) Disable() {
 		b.disabledBg,
 		0, 0)
 	b.disabled = true
+}
+
+func (b *LetterButton) Shuffle() {
+	b.shuffleAnimCountdown = 60 * 1 // 1 seconds at 60fps
+	b.Disable()
 }

@@ -80,6 +80,7 @@ var (
 		'Z': letterGfx{{X: 2, Y: 23}, {X: 3, Y: 23}, {X: 2, Y: 24}, {X: 3, Y: 24}},
 		'-': letterGfx{{X: 4, Y: 23}, {X: 5, Y: 23}, {X: 4, Y: 24}, {X: 5, Y: 24}},
 		//
+		's': letterGfx{{X: 18, Y: 23}, {X: 19, Y: 23}, {X: 18, Y: 24}, {X: 19, Y: 24}}, // SHUFFLE icon
 		'd': letterGfx{{X: 20, Y: 23}, {X: 21, Y: 23}, {X: 20, Y: 24}, {X: 21, Y: 24}}, // DEL icon
 		'o': letterGfx{{X: 22, Y: 23}, {X: 23, Y: 23}, {X: 22, Y: 24}, {X: 23, Y: 24}}, // OK icon
 	}
