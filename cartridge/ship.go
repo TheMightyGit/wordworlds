@@ -132,6 +132,8 @@ func (s *Ship) Start() {
 		updateable.Start()
 	}
 
+	s.addBarText()
+
 	s.updateGuessWord()
 }
 
@@ -245,6 +247,34 @@ func (s *Ship) shuffleButtons() {
 			lb.Shuffle()
 		}
 	}
+}
+
+func (s *Ship) addBarText() {
+	// HULL
+	s.buttonIconsArea.Set(image.Point{12, 9}, 0, 17, 0, 0)
+	s.buttonIconsArea.Set(image.Point{13, 9}, 1, 17, 0, 0)
+	s.buttonIconsArea.Set(image.Point{14, 9}, 2, 17, 0, 0)
+	s.buttonIconsArea.Set(image.Point{12, 10}, 0, 18, 0, 0)
+	s.buttonIconsArea.Set(image.Point{13, 10}, 1, 18, 0, 0)
+	s.buttonIconsArea.Set(image.Point{14, 10}, 2, 18, 0, 0)
+	// WEAPON
+	s.buttonIconsArea.Set(image.Point{3, 9}, 7, 17, 0, 0)
+	s.buttonIconsArea.Set(image.Point{4, 9}, 8, 17, 0, 0)
+	s.buttonIconsArea.Set(image.Point{5, 9}, 9, 17, 0, 0)
+	s.buttonIconsArea.Set(image.Point{6, 9}, 10, 17, 0, 0)
+	s.buttonIconsArea.Set(image.Point{3, 10}, 7, 18, 0, 0)
+	s.buttonIconsArea.Set(image.Point{4, 10}, 8, 18, 0, 0)
+	s.buttonIconsArea.Set(image.Point{5, 10}, 9, 18, 0, 0)
+	s.buttonIconsArea.Set(image.Point{6, 10}, 10, 18, 0, 0)
+	// SHIELD
+	s.buttonIconsArea.Set(image.Point{18, 9}, 3, 17, 0, 0)
+	s.buttonIconsArea.Set(image.Point{19, 9}, 4, 17, 0, 0)
+	s.buttonIconsArea.Set(image.Point{20, 9}, 5, 17, 0, 0)
+	s.buttonIconsArea.Set(image.Point{21, 9}, 6, 17, 0, 0)
+	s.buttonIconsArea.Set(image.Point{18, 10}, 3, 18, 0, 0)
+	s.buttonIconsArea.Set(image.Point{19, 10}, 4, 18, 0, 0)
+	s.buttonIconsArea.Set(image.Point{20, 10}, 5, 18, 0, 0)
+	s.buttonIconsArea.Set(image.Point{21, 10}, 6, 18, 0, 0)
 }
 
 func (s *Ship) addActionButton(pos image.Point, icon rune, onClick func(*LetterButton)) *LetterButton {
