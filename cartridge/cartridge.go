@@ -23,6 +23,7 @@ const (
 	MapAreaPanels
 	MapAreaShip
 	MapAreaStars
+	MapAreaBars
 )
 const (
 	SpriteStars = iota
