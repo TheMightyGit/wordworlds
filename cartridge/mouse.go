@@ -25,7 +25,7 @@ func NewPointer(sprite marvtypes.Sprite, area marvtypes.MapBankArea, clickables 
 }
 
 func (s *Pointer) Start() {
-	s.sprite = api.SpritesGet(SpriteMousePointer)
+	// s.sprite = api.SpritesGet(SpriteMousePointer)
 	s.sprite.ChangePos(image.Rectangle{image.Point{0, 0}, image.Point{10, 10}})
 	s.area.Set(image.Point{}, 1, 0, 0, 0)
 	s.sprite.Show(GfxBankGfx, s.area)

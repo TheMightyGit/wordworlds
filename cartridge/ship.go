@@ -31,6 +31,14 @@ type Ship struct {
 	okButton      *LetterButton
 	delButton     *LetterButton
 	shuffleButton *LetterButton
+
+	weaponProgressBar *ProgressBar
+	hullProgressBar   *ProgressBar
+	shieldProgressBar *ProgressBar
+
+	weaponButtonsDown int
+	hullButtonsDown   int
+	shieldButtonsDown int
 }
 
 func NewShip(
@@ -70,6 +78,8 @@ func (s *Ship) Start() {
 	s.spriteButtonIcons.Show(GfxBankGfx, s.buttonIconsArea)
 	spriteButtonLettersOffset := image.Point{40, 110}
 
+	s.setupProgressBars()
+
 	pos := image.Point{4, 11}
 	for rowIdx, letterRow := range []string{"--------", "--------", "--------"} {
 		for letterIdx := range letterRow {
@@ -82,15 +92,18 @@ func (s *Ship) Start() {
 			buttonArea := s.buttonIconsArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{2, 2})})
 			buttonBgArea := s.uiArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{3, 3})})
 
+			buttonsDown := &s.weaponButtonsDown
 			darkBox := darkRedBox
 			brightBox := brightRedBox
 
 			if letterIdx >= 5 {
 				darkBox = darkOrangeBox
 				brightBox = brightOrangeBox
+				buttonsDown = &s.shieldButtonsDown
 			} else if letterIdx >= 3 {
 				darkBox = darkGreenBox
 				brightBox = brightGreenBox
+				buttonsDown = &s.hullButtonsDown
 			}
 
 			button := NewLetterButton(buttonArea, buttonBgArea, dictionary.Dictionary.RandomLetter(), hitBox, func(lb *LetterButton) {
@@ -104,10 +117,12 @@ func (s *Ship) Start() {
 					}
 					s.selectedLetterButtons = newSelectedLetterButtons
 					lb.Enable()
+					*buttonsDown--
 				} else {
 					// add letter and disable button
 					lb.Disable()
 					s.selectedLetterButtons = append(s.selectedLetterButtons, lb)
+					*buttonsDown++
 				}
 				s.updateGuessWord()
 			}, darkBox, brightBox)
@@ -131,8 +146,6 @@ func (s *Ship) Start() {
 	for _, updateable := range s.updateables {
 		updateable.Start()
 	}
-
-	s.addBarText()
 
 	s.updateGuessWord()
 }
@@ -168,6 +181,8 @@ func (s *Ship) updateGuessWord() {
 	}
 	paddedWord := strings.Repeat(" ", pad) + word
 
+	valid := false
+
 	s.guessWordArea.Clear(0, 0)
 	if len(word) > 0 {
 		pos := image.Point{0, 0}
@@ -176,6 +191,7 @@ func (s *Ship) updateGuessWord() {
 		if dictionary.Dictionary.ContainsWord(word) {
 			// api.ConsolePrintln(word, " VALID")
 			s.okButton.letter = 'o'
+			valid = true
 		} else {
 			// api.ConsolePrintln(word, " INVALID")
 			s.okButton.letter = ' '
@@ -189,6 +205,22 @@ func (s *Ship) updateGuessWord() {
 
 	s.okButton.Start()
 	s.delButton.Start()
+
+	// update a bar
+	if valid {
+		weaponScore := float64(s.weaponButtonsDown) * 0.05
+		hullScore := float64(s.hullButtonsDown) * 0.05
+		shieldScore := float64(s.shieldButtonsDown) * 0.05
+
+		s.weaponProgressBar.SetTargetPercentage(s.weaponProgressBar.CurrentPercentage() + weaponScore)
+		s.hullProgressBar.SetTargetPercentage(s.hullProgressBar.CurrentPercentage() + hullScore)
+		s.shieldProgressBar.SetTargetPercentage(s.shieldProgressBar.CurrentPercentage() + shieldScore)
+	} else {
+		// not valid, so no potential score
+		s.weaponProgressBar.SetTargetPercentage(s.weaponProgressBar.CurrentPercentage())
+		s.hullProgressBar.SetTargetPercentage(s.hullProgressBar.CurrentPercentage())
+		s.shieldProgressBar.SetTargetPercentage(s.shieldProgressBar.CurrentPercentage())
+	}
 }
 
 func (s *Ship) addOkButton() *LetterButton {
@@ -297,6 +329,44 @@ func (s *Ship) addActionButton(pos image.Point, icon rune, onClick func(*LetterB
 	s.updateables = append(s.updateables, button)
 	s.clickables = append(s.clickables, button)
 	return button
+}
+
+func (s *Ship) setupProgressBars() {
+	progressArea := api.MapBanksGet(MapBankGfx).GetArea(MapAreaBars)
+	s.weaponProgressBar = NewProgressBar(
+		image.Rectangle{image.Point{40 + 1, 100}, image.Point{90 - 2, 10}},
+		api.SpritesGet(SpriteWeaponProgressBar),
+		progressArea.GetSubArea(
+			image.Rectangle{image.Point{0, 0}, image.Point{32, 1}},
+		),
+	)
+	s.hullProgressBar = NewProgressBar(
+		image.Rectangle{image.Point{130 + 1, 100}, image.Point{60 - 2, 10}},
+		api.SpritesGet(SpriteHullProgressBar),
+		progressArea.GetSubArea(
+			image.Rectangle{image.Point{0, 1}, image.Point{32, 2}},
+		),
+	)
+	s.shieldProgressBar = NewProgressBar(
+		image.Rectangle{image.Point{190 + 1, 100}, image.Point{90 - 2, 10}},
+		api.SpritesGet(SpriteShieldProgressBar),
+		progressArea.GetSubArea(
+			image.Rectangle{image.Point{0, 2}, image.Point{32, 3}},
+		),
+	)
+
+	s.updateables = append(s.updateables, s.weaponProgressBar)
+	s.updateables = append(s.updateables, s.hullProgressBar)
+	s.updateables = append(s.updateables, s.shieldProgressBar)
+
+	s.weaponProgressBar.SetCurrentPercentage(0.5)
+	s.weaponProgressBar.SetTargetPercentage(0.75)
+	s.hullProgressBar.SetCurrentPercentage(0.5)
+	s.hullProgressBar.SetTargetPercentage(0.75)
+	s.shieldProgressBar.SetCurrentPercentage(0.5)
+	s.shieldProgressBar.SetTargetPercentage(0.75)
+
+	s.addBarText()
 }
 
 type LetterButton struct {

@@ -34,6 +34,9 @@ const (
 	SpriteShip
 	SpritePanels
 	SpriteUI
+	SpriteWeaponProgressBar
+	SpriteHullProgressBar
+	SpriteShieldProgressBar
 	SpriteButtonLetters
 	SpriteGuessWord
 
