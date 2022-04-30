@@ -52,6 +52,11 @@ func (b *ProgressBar) SetTargetPercentage(percentage float64) {
 	b.dirty = true
 }
 
+func (b *ProgressBar) HitTarget() {
+	b.currentPercent = b.targetPercent
+	b.dirty = true
+}
+
 func (b *ProgressBar) UpdatePercentages() {
 	//	r := b.rect // copy original rect
 	//	r.Max.X = int(float64(r.Max.X) * b.currentPercent)

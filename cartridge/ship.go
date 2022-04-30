@@ -232,6 +232,9 @@ func (s *Ship) addOkButton() *LetterButton {
 			for _, lb := range s.selectedLetterButtons {
 				lb.Shuffle()
 			}
+			s.weaponProgressBar.HitTarget()
+			s.hullProgressBar.HitTarget()
+			s.shieldProgressBar.HitTarget()
 			s.removeGuessWord()
 		},
 	)
@@ -270,6 +273,10 @@ func (s *Ship) removeGuessWord() {
 	// remove selected buttons
 	s.selectedLetterButtons = []*LetterButton{}
 	s.updateGuessWord()
+
+	s.weaponButtonsDown = 0
+	s.hullButtonsDown = 0
+	s.shieldButtonsDown = 0
 }
 
 func (s *Ship) shuffleButtons() {
