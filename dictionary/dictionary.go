@@ -17,6 +17,7 @@ type Dict interface {
 	RandomWord() string
 	ContainsWord(string) bool
 	RandomLetter() rune
+	GetLetterFrequency(rune) int
 }
 
 type dict struct {
@@ -75,6 +76,15 @@ func (d *dict) RandomLetter() rune {
 		}
 	}
 	return ' '
+}
+
+func (d *dict) GetLetterFrequency(letter rune) int {
+	for _, lf := range d.lettersFreq {
+		if lf.letter == letter {
+			return lf.freq
+		}
+	}
+	return 0
 }
 
 func (d *dict) calcLetterFrequency() {

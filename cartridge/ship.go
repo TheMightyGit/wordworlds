@@ -123,6 +123,7 @@ func (s *Ship) Start() {
 					lb.Disable()
 					s.selectedLetterButtons = append(s.selectedLetterButtons, lb)
 					*buttonsDown++
+					api.ConsolePrintln(dictionary.Dictionary.GetLetterFrequency(lb.letter))
 				}
 				s.updateGuessWord()
 			}, darkBox, brightBox)
@@ -208,9 +209,12 @@ func (s *Ship) updateGuessWord() {
 
 	// update a bar
 	if valid {
-		weaponScore := float64(s.weaponButtonsDown) * 0.05
-		hullScore := float64(s.hullButtonsDown) * 0.05
-		shieldScore := float64(s.shieldButtonsDown) * 0.05
+
+		scoreMultiplier := 1.0 + (float64(len(s.selectedLetterButtons)-3) * 0.1) // 10% per letter past 3 letters
+		api.ConsolePrintln(s.weaponButtonsDown, s.hullButtonsDown, s.shieldButtonsDown, scoreMultiplier)
+		weaponScore := (float64(s.weaponButtonsDown) * 0.05) * scoreMultiplier
+		hullScore := (float64(s.hullButtonsDown) * 0.05) * scoreMultiplier
+		shieldScore := (float64(s.shieldButtonsDown) * 0.05) * scoreMultiplier
 
 		s.weaponProgressBar.SetTargetPercentage(s.weaponProgressBar.CurrentPercentage() + weaponScore)
 		s.hullProgressBar.SetTargetPercentage(s.hullProgressBar.CurrentPercentage() + hullScore)
