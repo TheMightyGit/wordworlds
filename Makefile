@@ -1,11 +1,15 @@
 GO?=go
 
 .PHONY: all
-all: dictionary/dictionary.txt run
+all: dictionary/dictionary.txt lint run
 
 .PHONY: run
 run:
 	$(GO) run ./cmd/wordworlds/main.go
+
+.PHONY: lint
+lint:
+	golangci-lint run
 
 dictionary/dictionary.txt:
 	# NOTE: install aspell if not already.
