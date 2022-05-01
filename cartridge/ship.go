@@ -209,7 +209,6 @@ func (s *Ship) updateGuessWord() {
 
 	// update a bar
 	if valid {
-
 		scoreMultiplier := 1.0 + (float64(len(s.selectedLetterButtons)-3) * 0.1) // 10% per letter past 3 letters
 		api.ConsolePrintln(s.weaponButtonsDown, s.hullButtonsDown, s.shieldButtonsDown, scoreMultiplier)
 		weaponScore := (float64(s.weaponButtonsDown) * 0.05) * scoreMultiplier

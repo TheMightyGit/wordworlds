@@ -24,13 +24,14 @@ type dict struct {
 	words   []string
 	wordMap map[string]struct{}
 
-	lettersFreq      []letterFreq
+	lettersFreq      []*letterFreq
 	lettersFreqTotal int
 }
 
 type letterFreq struct {
 	letter rune
 	freq   int
+	rank   int
 }
 
 func newDict(rawfiledata string) Dict {
@@ -81,7 +82,7 @@ func (d *dict) RandomLetter() rune {
 func (d *dict) GetLetterFrequency(letter rune) int {
 	for _, lf := range d.lettersFreq {
 		if lf.letter == letter {
-			return lf.freq
+			return lf.rank
 		}
 	}
 	return 0
@@ -94,11 +95,20 @@ func (d *dict) calcLetterFrequency() {
 			countMap[letter]++
 		}
 	}
+	highestFreq := 0
 	for k, v := range countMap {
-		d.lettersFreq = append(d.lettersFreq, letterFreq{
+		d.lettersFreq = append(d.lettersFreq, &letterFreq{
 			letter: k,
 			freq:   v,
 		})
 		d.lettersFreqTotal += v
+		if v > highestFreq {
+			highestFreq = v
+		}
+	}
+	// calculate bucketed rank
+	numBuckets := float64(8)
+	for _, lf := range d.lettersFreq {
+		lf.rank = int((numBuckets + 1) - ((float64(lf.freq) / float64(highestFreq)) * numBuckets))
 	}
 }
