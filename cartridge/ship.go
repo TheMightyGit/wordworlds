@@ -235,6 +235,12 @@ func (s *Ship) addOkButton() *LetterButton {
 			s.weaponProgressBar.HitTarget()
 			s.hullProgressBar.HitTarget()
 			s.shieldProgressBar.HitTarget()
+
+			if s.weaponProgressBar.CurrentPercentage() >= 0.5 {
+				s.weaponProgressBar.SetCurrentPercentage(0.0)
+				s.weaponProgressBar.SetTargetPercentage(0.0)
+			}
+
 			s.removeGuessWord()
 		},
 	)
@@ -366,12 +372,9 @@ func (s *Ship) setupProgressBars() {
 	s.updateables = append(s.updateables, s.hullProgressBar)
 	s.updateables = append(s.updateables, s.shieldProgressBar)
 
-	s.weaponProgressBar.SetCurrentPercentage(0.5)
-	s.weaponProgressBar.SetTargetPercentage(0.75)
-	s.hullProgressBar.SetCurrentPercentage(0.5)
-	s.hullProgressBar.SetTargetPercentage(0.75)
+	s.weaponProgressBar.SetCurrentPercentage(0.0)
+	s.hullProgressBar.SetCurrentPercentage(1.0)
 	s.shieldProgressBar.SetCurrentPercentage(0.5)
-	s.shieldProgressBar.SetTargetPercentage(0.75)
 
 	s.addBarText()
 }
