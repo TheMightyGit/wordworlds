@@ -93,15 +93,15 @@ func (s *Ship) Start() {
 			buttonBgArea := s.uiArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{3, 3})})
 
 			buttonsDown := &s.weaponButtonsDown
-			darkBox := darkRedBox
+			darkBox := darkBlueBox
 			brightBox := brightRedBox
 
 			if letterIdx >= 5 {
-				darkBox = darkOrangeBox
+				// darkBox = darkOrangeBox
 				brightBox = brightOrangeBox
 				buttonsDown = &s.shieldButtonsDown
 			} else if letterIdx >= 3 {
-				darkBox = darkGreenBox
+				// darkBox = darkGreenBox
 				brightBox = brightGreenBox
 				buttonsDown = &s.hullButtonsDown
 			}
@@ -444,36 +444,41 @@ func (b *LetterButton) OnClick(pos image.Point) bool {
 }
 
 var (
+	darkBlueBox = &[9]image.Point{
+		{0, 1}, {1, 1}, {2, 1},
+		{0, 2}, {1, 2}, {2, 2},
+		{0, 3}, {1, 3}, {2, 3},
+	}
 	brightRedBox = &[9]image.Point{
 		{0, 11}, {1, 11}, {2, 11},
 		{0, 12}, {1, 12}, {2, 12},
 		{0, 13}, {1, 13}, {2, 13},
 	}
-	darkRedBox = &[9]image.Point{
-		{0, 1}, {1, 1}, {2, 1},
-		{0, 2}, {1, 2}, {2, 2},
-		{0, 3}, {1, 3}, {2, 3},
-	}
+	//	darkRedBox = &[9]image.Point{
+	//		{0, 1}, {1, 1}, {2, 1},
+	//		{0, 2}, {1, 2}, {2, 2},
+	//		{0, 3}, {1, 3}, {2, 3},
+	//	}
 	brightGreenBox = &[9]image.Point{
 		{3, 11}, {4, 11}, {5, 11},
 		{3, 12}, {4, 12}, {5, 12},
 		{3, 13}, {4, 13}, {5, 13},
 	}
-	darkGreenBox = &[9]image.Point{
-		{3, 1}, {4, 1}, {5, 1},
-		{3, 2}, {4, 2}, {5, 2},
-		{3, 3}, {4, 3}, {5, 3},
-	}
+	//	darkGreenBox = &[9]image.Point{
+	//		{3, 1}, {4, 1}, {5, 1},
+	//		{3, 2}, {4, 2}, {5, 2},
+	//		{3, 3}, {4, 3}, {5, 3},
+	//	}
 	brightOrangeBox = &[9]image.Point{
 		{6, 11}, {7, 11}, {8, 11},
 		{6, 12}, {7, 12}, {8, 12},
 		{6, 13}, {7, 13}, {8, 13},
 	}
-	darkOrangeBox = &[9]image.Point{
-		{6, 1}, {7, 1}, {8, 1},
-		{6, 2}, {7, 2}, {8, 2},
-		{6, 3}, {7, 3}, {8, 3},
-	}
+	//	darkOrangeBox = &[9]image.Point{
+	//		{6, 1}, {7, 1}, {8, 1},
+	//		{6, 2}, {7, 2}, {8, 2},
+	//		{6, 3}, {7, 3}, {8, 3},
+	//	}
 	solidBlueBox = &[9]image.Point{
 		{1, 8}, {1, 8}, {1, 8},
 		{1, 8}, {1, 8}, {1, 8},
