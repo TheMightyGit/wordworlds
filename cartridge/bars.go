@@ -10,7 +10,6 @@ type ProgressBar struct {
 	sprite marvtypes.Sprite
 	area   marvtypes.MapBankArea
 	rect   image.Rectangle
-	pos    image.Point
 
 	currentPercent float64
 	targetPercent  float64
