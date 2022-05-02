@@ -7,7 +7,7 @@ import (
 
 func main() {
 	marvlib.API.ConsoleBoot(
-		"wordworlds",
+		"Space-Tome",
 		cartridge.Resources,
 		cartridge.Start,
 		cartridge.Update,
