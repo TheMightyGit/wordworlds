@@ -35,10 +35,6 @@ type Ship struct {
 	weaponProgressBar *ProgressBar
 	hullProgressBar   *ProgressBar
 	shieldProgressBar *ProgressBar
-
-	weaponButtonsDown int
-	hullButtonsDown   int
-	shieldButtonsDown int
 }
 
 func NewShip(
@@ -92,18 +88,18 @@ func (s *Ship) Start() {
 			buttonArea := s.buttonIconsArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{2, 2})})
 			buttonBgArea := s.uiArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{3, 3})})
 
-			buttonsDown := &s.weaponButtonsDown
 			darkBox := darkBlueBox
 			brightBox := brightRedBox
+			letterType := LetterTypeWeapon
 
 			if letterIdx >= 5 {
 				// darkBox = darkOrangeBox
 				brightBox = brightOrangeBox
-				buttonsDown = &s.shieldButtonsDown
+				letterType = LetterTypeShield
 			} else if letterIdx >= 3 {
 				// darkBox = darkGreenBox
 				brightBox = brightGreenBox
-				buttonsDown = &s.hullButtonsDown
+				letterType = LetterTypeHull
 			}
 
 			button := NewLetterButton(buttonArea, buttonBgArea, dictionary.Dictionary.RandomLetter(), hitBox, func(lb *LetterButton) {
@@ -117,19 +113,20 @@ func (s *Ship) Start() {
 					}
 					s.selectedLetterButtons = newSelectedLetterButtons
 					lb.Enable()
-					*buttonsDown--
 				} else {
 					// add letter and disable button
 					lb.Disable()
 					s.selectedLetterButtons = append(s.selectedLetterButtons, lb)
-					*buttonsDown++
-					api.ConsolePrintln(dictionary.Dictionary.GetLetterFrequency(lb.letter))
+					// api.ConsolePrintln(dictionary.Dictionary.GetLetterFrequency(lb.letter))
 				}
 				s.updateGuessWord()
 			}, darkBox, brightBox)
+			button.LetterType = letterType
+
 			s.updateables = append(s.updateables, button)
 			s.clickables = append(s.clickables, button)
 			s.allLetterButtons = append(s.allLetterButtons, button)
+
 			pos = pos.Add(image.Point{3, 0})
 		}
 		pos = pos.Add(image.Point{-(3 * len(letterRow)), 3})
@@ -182,7 +179,7 @@ func (s *Ship) updateGuessWord() {
 	}
 	paddedWord := strings.Repeat(" ", pad) + word
 
-	valid := false
+	// valid := false
 
 	s.guessWordArea.Clear(0, 0)
 	if len(word) > 0 {
@@ -192,7 +189,7 @@ func (s *Ship) updateGuessWord() {
 		if dictionary.Dictionary.ContainsWord(word) {
 			// api.ConsolePrintln(word, " VALID")
 			s.okButton.letter = 'o'
-			valid = true
+			// valid = true
 		} else {
 			// api.ConsolePrintln(word, " INVALID")
 			s.okButton.letter = ' '
@@ -207,23 +204,29 @@ func (s *Ship) updateGuessWord() {
 	s.okButton.Start()
 	s.delButton.Start()
 
-	// update a bar
-	if valid {
-		scoreMultiplier := 1.0 + (float64(len(s.selectedLetterButtons)-3) * 0.1) // 10% per letter past 3 letters
-		api.ConsolePrintln(s.weaponButtonsDown, s.hullButtonsDown, s.shieldButtonsDown, scoreMultiplier)
-		weaponScore := (float64(s.weaponButtonsDown) * 0.05) * scoreMultiplier
-		hullScore := (float64(s.hullButtonsDown) * 0.05) * scoreMultiplier
-		shieldScore := (float64(s.shieldButtonsDown) * 0.05) * scoreMultiplier
-
-		s.weaponProgressBar.SetTargetPercentage(s.weaponProgressBar.CurrentPercentage() + weaponScore)
-		s.hullProgressBar.SetTargetPercentage(s.hullProgressBar.CurrentPercentage() + hullScore)
-		s.shieldProgressBar.SetTargetPercentage(s.shieldProgressBar.CurrentPercentage() + shieldScore)
-	} else {
-		// not valid, so no potential score
-		s.weaponProgressBar.SetTargetPercentage(s.weaponProgressBar.CurrentPercentage())
-		s.hullProgressBar.SetTargetPercentage(s.hullProgressBar.CurrentPercentage())
-		s.shieldProgressBar.SetTargetPercentage(s.shieldProgressBar.CurrentPercentage())
+	weaponLettersTotal := 0
+	hullLettersTotal := 0
+	shieldLettersTotal := 0
+	for _, lb := range s.selectedLetterButtons {
+		switch lb.LetterType {
+		case LetterTypeWeapon:
+			weaponLettersTotal += dictionary.Dictionary.GetLetterFrequency(lb.letter)
+		case LetterTypeHull:
+			hullLettersTotal += dictionary.Dictionary.GetLetterFrequency(lb.letter)
+		case LetterTypeShield:
+			shieldLettersTotal += dictionary.Dictionary.GetLetterFrequency(lb.letter)
+		}
 	}
+
+	scoreMultiplier := 1.0 + (float64(len(s.selectedLetterButtons)-3) * 0.2) // 20% per letter past 3 letters
+	// api.ConsolePrintln(s.weaponButtonsDown, s.hullButtonsDown, s.shieldButtonsDown, scoreMultiplier)
+	weaponScore := (float64(weaponLettersTotal) * 0.01) * scoreMultiplier
+	hullScore := (float64(hullLettersTotal) * 0.05) * scoreMultiplier
+	shieldScore := (float64(shieldLettersTotal) * 0.01) * scoreMultiplier
+
+	s.weaponProgressBar.SetTargetPercentage(s.weaponProgressBar.CurrentPercentage() + weaponScore)
+	s.hullProgressBar.SetTargetPercentage(s.hullProgressBar.CurrentPercentage() + hullScore)
+	s.shieldProgressBar.SetTargetPercentage(s.shieldProgressBar.CurrentPercentage() + shieldScore)
 }
 
 func (s *Ship) addOkButton() *LetterButton {
@@ -281,11 +284,8 @@ func (s *Ship) removeGuessWord() {
 	}
 	// remove selected buttons
 	s.selectedLetterButtons = []*LetterButton{}
-	s.updateGuessWord()
 
-	s.weaponButtonsDown = 0
-	s.hullButtonsDown = 0
-	s.shieldButtonsDown = 0
+	s.updateGuessWord()
 }
 
 func (s *Ship) shuffleButtons() {
@@ -382,6 +382,13 @@ func (s *Ship) setupProgressBars() {
 	s.addBarText()
 }
 
+const (
+	LetterTypeNone = iota
+	LetterTypeWeapon
+	LetterTypeHull
+	LetterTypeShield
+)
+
 type LetterButton struct {
 	area       marvtypes.MapBankArea
 	bgArea     marvtypes.MapBankArea
@@ -392,6 +399,8 @@ type LetterButton struct {
 	disabled   bool
 	enabledBg  *[9]image.Point
 	disabledBg *[9]image.Point
+
+	LetterType int // LetterType*
 
 	shuffleAnimCountdown int
 }
