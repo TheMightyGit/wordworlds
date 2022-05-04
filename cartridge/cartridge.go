@@ -3,6 +3,7 @@ package cartridge
 import (
 	"embed"
 	"image"
+	"math/rand"
 
 	"github.com/TheMightyGit/marv/marvlib"
 	"github.com/TheMightyGit/marv/marvtypes"
@@ -24,6 +25,7 @@ const (
 	MapAreaShip
 	MapAreaStars
 	MapAreaBars
+	MapAreaBaddies
 )
 const (
 	SpriteStars = iota
@@ -47,6 +49,7 @@ var (
 	api = marvlib.API
 
 	stars   *Stars
+	baddies []*Baddie
 	ship    *Ship
 	pointer *Pointer
 )
@@ -101,6 +104,17 @@ func Start() {
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaStars),
 	)
 
+	baddies = append(baddies, NewBaddie(
+		image.Point{140, 35},
+		api.SpritesGet(SpriteBaddieStart+0),
+		api.MapBanksGet(MapBankGfx).GetArea(MapAreaBaddies),
+	))
+	baddies = append(baddies, NewBaddie(
+		image.Point{180, 45},
+		api.SpritesGet(SpriteBaddieStart+1),
+		api.MapBanksGet(MapBankGfx).GetArea(MapAreaBaddies),
+	))
+
 	ship = NewShip(
 		api.SpritesGet(SpriteShip),
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaShip),
@@ -115,15 +129,14 @@ func Start() {
 		ship,
 	)
 
-	/*
-		for _, w := range dictionary.Dictionary.Words() {
-			api.ConsolePrintln(w)
-		}
-	*/
-
 	stars.Start()
 	ship.Start()
 	pointer.Start()
+
+	for _, b := range baddies {
+		b.cnt = rand.Float64()
+		b.Start()
+	}
 
 	api.SpritesSort()
 }
@@ -132,6 +145,9 @@ func Update() {
 	stars.Update()
 	ship.Update()
 	pointer.Update()
+	for _, b := range baddies {
+		b.Update()
+	}
 }
 
 func drawText(area marvtypes.MapBankArea, pos image.Point, txt string, spacing int) {
