@@ -129,7 +129,7 @@ func Start() {
 		api.SpritesGet(SpritePanels),
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaPanels),
 		api.SpritesGet(SpriteUI),
-		// overlay,
+		overlay,
 	)
 
 	pointer = NewPointer(

@@ -35,6 +35,8 @@ type Ship struct {
 	weaponProgressBar *ProgressBar
 	hullProgressBar   *ProgressBar
 	shieldProgressBar *ProgressBar
+
+	overlay *Overlay
 }
 
 func NewShip(
@@ -43,6 +45,7 @@ func NewShip(
 	spritePanels marvtypes.Sprite,
 	areaPanels marvtypes.MapBankArea,
 	spriteUI marvtypes.Sprite,
+	overlay *Overlay,
 ) *Ship {
 	return &Ship{
 		spriteShip:   spriteShip,
@@ -50,6 +53,7 @@ func NewShip(
 		spritePanels: spritePanels,
 		areaPanels:   areaPanels,
 		spriteUI:     spriteUI,
+		overlay:      overlay,
 	}
 }
 
@@ -255,6 +259,8 @@ func (s *Ship) addOkButton() *LetterButton {
 				s.weaponProgressBar.SetCurrentPercentage(0.0)
 				s.weaponProgressBar.SetTargetPercentage(0.0)
 			}
+
+			s.overlay.AddWord(s.getGuessWord())
 
 			s.removeGuessWord()
 		},
