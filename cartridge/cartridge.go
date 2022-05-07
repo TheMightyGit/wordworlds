@@ -166,6 +166,7 @@ func Start() {
 	pointer.Start()
 
 	for _, b := range baddies {
+		b.Damage(rand.Intn(b.maxHitPoints))
 		b.cnt = rand.Float64()
 		b.Start()
 	}

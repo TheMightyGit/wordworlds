@@ -63,7 +63,8 @@ func (o *Overlay) UpdateBaddies(baddies ...*Baddie) {
 
 func (o *Overlay) statBar(val float64, width int) string {
 	health := int(val * (float64(width) - 2))
-	return "|" + strings.Repeat("=", health) + "|"
+	pad := (width - health) - 2
+	return "|" + strings.Repeat("=", health) + strings.Repeat(" ", pad) + "|"
 }
 
 func (o *Overlay) Start() {
