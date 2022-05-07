@@ -8,6 +8,9 @@ import (
 )
 
 type Baddie struct {
+	name          string
+	maxHitPoints  int
+	hitPoints     int
 	spriteBaddie  marvtypes.Sprite
 	area          marvtypes.MapBankArea
 	pos           image.Point
@@ -15,12 +18,23 @@ type Baddie struct {
 	cnt           float64
 }
 
-func NewBaddie(pos image.Point, sprite marvtypes.Sprite, area marvtypes.MapBankArea) *Baddie {
+func NewBaddie(name string, hitPoints int, pos image.Point, sprite marvtypes.Sprite, area marvtypes.MapBankArea) *Baddie {
 	return &Baddie{
+		name:         name,
+		hitPoints:    hitPoints,
+		maxHitPoints: hitPoints,
 		spriteBaddie: sprite,
 		area:         area,
 		pos:          pos,
 	}
+}
+
+func (b *Baddie) GetName() string {
+	return b.name
+}
+
+func (b *Baddie) GetHealth() float64 {
+	return float64(b.hitPoints) / float64(b.maxHitPoints)
 }
 
 func (b *Baddie) Start() {

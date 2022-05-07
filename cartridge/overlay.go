@@ -2,6 +2,7 @@ package cartridge
 
 import (
 	"image"
+	"strings"
 
 	"github.com/TheMightyGit/marv/marvtypes"
 )
@@ -31,6 +32,28 @@ func NewOverlay(sprite marvtypes.Sprite, area marvtypes.MapBankArea) *Overlay {
 func (o *Overlay) AddWord(txt string) {
 	o.usedWordsArea.StringToMap(o.cursorPos, 14, 16, txt)
 	o.cursorPos.Y++
+}
+
+func (o *Overlay) AddBaddies(baddies ...*Baddie) {
+	pos := image.Point{}
+	longestName := 0
+	for _, b := range baddies {
+		nameLen := len(b.GetName())
+		if nameLen > longestName {
+			longestName = nameLen
+		}
+	}
+	barWidth := 39 - longestName
+	for _, b := range baddies {
+		pad := strings.Repeat(" ", longestName-len(b.GetName()))
+		o.alertArea.StringToMap(pos, 14, 16, b.GetName()+pad+" "+o.statBar(b.GetHealth(), barWidth))
+		pos.Y++
+	}
+}
+
+func (o *Overlay) statBar(val float64, width int) string {
+	health := int(val * (float64(width) - 2))
+	return "|" + strings.Repeat("=", health) + "|"
 }
 
 func (o *Overlay) Start() {
@@ -67,8 +90,6 @@ func (o *Overlay) Start() {
 		image.Point{19 + 1, 1},
 		image.Point{60, 3},
 	})
-	o.alertArea.StringToMap(image.Point{0, 0}, 14, 16, "Baddie #1: |===============            |")
-	o.alertArea.StringToMap(image.Point{0, 1}, 14, 16, "Baddie #2: |===========================|")
 
 	o.area.DrawBox(
 		image.Rectangle{

@@ -109,11 +109,15 @@ func Start() {
 	)
 
 	baddies = append(baddies, NewBaddie(
+		"Interceptor",
+		100,
 		image.Point{140, 35},
 		api.SpritesGet(SpriteBaddieStart+0),
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaBaddies),
 	))
 	baddies = append(baddies, NewBaddie(
+		"Fighter",
+		100,
 		image.Point{180, 45},
 		api.SpritesGet(SpriteBaddieStart+1),
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaBaddies),
@@ -147,6 +151,8 @@ func Start() {
 		b.cnt = rand.Float64()
 		b.Start()
 	}
+
+	overlay.AddBaddies(baddies...)
 
 	api.SpritesSort()
 }
