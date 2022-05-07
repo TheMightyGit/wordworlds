@@ -1,6 +1,7 @@
 package cartridge
 
 import (
+	"fmt"
 	"image"
 	"strings"
 
@@ -102,25 +103,34 @@ func (s *Ship) Start() {
 				letterType = LetterTypeHull
 			}
 
-			button := NewLetterButton(buttonArea, buttonBgArea, dictionary.Dictionary.RandomLetter(), hitBox, func(lb *LetterButton) {
-				if lb.disabled {
-					// remove from letter list
-					newSelectedLetterButtons := []*LetterButton{}
-					for _, b := range s.selectedLetterButtons {
-						if b != lb {
-							newSelectedLetterButtons = append(newSelectedLetterButtons, b)
+			button := NewLetterButton(
+				buttonArea,
+				buttonBgArea,
+				s.getRandomLetter(),
+				hitBox,
+				s.getRandomLetter,
+				func(lb *LetterButton) {
+					if lb.disabled {
+						// remove from letter list
+						newSelectedLetterButtons := []*LetterButton{}
+						for _, b := range s.selectedLetterButtons {
+							if b != lb {
+								newSelectedLetterButtons = append(newSelectedLetterButtons, b)
+							}
 						}
+						s.selectedLetterButtons = newSelectedLetterButtons
+						lb.Enable()
+					} else {
+						// add letter and disable button
+						lb.Disable()
+						s.selectedLetterButtons = append(s.selectedLetterButtons, lb)
+						// api.ConsolePrintln(dictionary.Dictionary.GetLetterFrequency(lb.letter))
 					}
-					s.selectedLetterButtons = newSelectedLetterButtons
-					lb.Enable()
-				} else {
-					// add letter and disable button
-					lb.Disable()
-					s.selectedLetterButtons = append(s.selectedLetterButtons, lb)
-					// api.ConsolePrintln(dictionary.Dictionary.GetLetterFrequency(lb.letter))
-				}
-				s.updateGuessWord()
-			}, darkBox, brightBox)
+					s.updateGuessWord()
+				},
+				darkBox,
+				brightBox,
+			)
 			button.LetterType = letterType
 
 			s.updateables = append(s.updateables, button)
@@ -341,7 +351,7 @@ func (s *Ship) addActionButton(pos image.Point, icon rune, onClick func(*LetterB
 	hitBox := image.Rectangle{hitPos, hitPos.Add(image.Point{30, 30})}
 	buttonArea := s.buttonIconsArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{2, 2})})
 	buttonBgArea := s.uiArea.GetSubArea(image.Rectangle{pos, pos.Add(image.Point{3, 3})})
-	button := NewLetterButton(buttonArea, buttonBgArea, icon, hitBox, onClick, solidBlueBox, solidBlueBox)
+	button := NewLetterButton(buttonArea, buttonBgArea, icon, hitBox, func() rune { return icon }, onClick, solidBlueBox, solidBlueBox)
 	s.updateables = append(s.updateables, button)
 	s.clickables = append(s.clickables, button)
 	return button
@@ -382,6 +392,38 @@ func (s *Ship) setupProgressBars() {
 	s.addBarText()
 }
 
+func (s *Ship) getRandomLetter() rune {
+	return dictionary.Dictionary.RandomLetterReducedByLettersInPlayHistogram(
+		s.getLettersInPlayHistogram(),
+	)
+}
+
+func (s *Ship) getLettersInPlayHistogram() map[rune]float64 {
+	freqMap := map[rune]int{}
+
+	for _, lb := range s.allLetterButtons {
+		if !lb.disabled {
+			freqMap[lb.letter]++
+		}
+	}
+
+	highest := 0
+	for _, v := range freqMap {
+		if v > highest {
+			highest = v
+		}
+	}
+
+	normFreqMap := map[rune]float64{}
+	for k, v := range freqMap {
+		normFreqMap[k] = float64(v) / float64(highest)
+	}
+
+	fmt.Println("getLettersInPlayHistogram: ", normFreqMap)
+
+	return normFreqMap
+}
+
 const (
 	LetterTypeNone = iota
 	LetterTypeWeapon
@@ -395,6 +437,7 @@ type LetterButton struct {
 	letter     rune
 	hitBox     image.Rectangle
 	clicked    bool
+	newLetter  func() rune
 	onClick    LetterButtonOnClickFunc
 	disabled   bool
 	enabledBg  *[9]image.Point
@@ -412,6 +455,7 @@ func NewLetterButton(
 	bgArea marvtypes.MapBankArea,
 	letter rune,
 	hitBox image.Rectangle,
+	newLetter func() rune,
 	onClick LetterButtonOnClickFunc,
 	enabledBg *[9]image.Point,
 	disabledBg *[9]image.Point,
@@ -421,6 +465,7 @@ func NewLetterButton(
 		bgArea:     bgArea,
 		letter:     letter,
 		hitBox:     hitBox,
+		newLetter:  newLetter,
 		onClick:    onClick,
 		enabledBg:  enabledBg,
 		disabledBg: disabledBg,
@@ -436,7 +481,7 @@ func (b *LetterButton) Start() {
 func (b *LetterButton) Update() {
 	if b.shuffleAnimCountdown > 0 {
 		if b.shuffleAnimCountdown%5 == 0 {
-			b.letter = dictionary.Dictionary.RandomLetter()
+			b.letter = b.newLetter()
 			b.Start()
 		}
 		b.shuffleAnimCountdown--

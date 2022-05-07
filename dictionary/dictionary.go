@@ -2,6 +2,7 @@ package dictionary
 
 import (
 	_ "embed"
+	"fmt"
 	"math/rand"
 	"strings"
 )
@@ -16,7 +17,7 @@ type Dict interface {
 	Words() []string
 	RandomWord() string
 	ContainsWord(string) bool
-	RandomLetter() rune
+	RandomLetterReducedByLettersInPlayHistogram(map[rune]float64) rune
 	GetLetterFrequency(rune) int
 }
 
@@ -24,14 +25,14 @@ type dict struct {
 	words   []string
 	wordMap map[string]struct{}
 
-	lettersFreq      []*letterFreq
-	lettersFreqTotal int
+	lettersFreq []*letterFreq
 }
 
 type letterFreq struct {
-	letter rune
-	freq   int
-	rank   int
+	letter   rune
+	freq     int
+	freqNorm float64 // 0.0 to 1.0
+	rank     int
 }
 
 func newDict(rawfiledata string) Dict {
@@ -66,17 +67,30 @@ func (d *dict) ContainsWord(word string) bool {
 	return found
 }
 
-func (d *dict) RandomLetter() rune {
-	// This tends towards the most common letters over time :/
-	pos := rand.Intn(d.lettersFreqTotal)
-	total := 0
+func (d *dict) RandomLetterReducedByLettersInPlayHistogram(lettersInPlayHistogram map[rune]float64) rune {
+	// subtract the latters in play histogram from the dictionary histogram
+	histogram := map[rune]float64{}
+	histTotal := float64(0)
 	for _, lf := range d.lettersFreq {
-		total += lf.freq
+		val := lf.freqNorm - (lettersInPlayHistogram[lf.letter] * 0.9)
+		if val < 0 {
+			val = 0
+		}
+		histTotal += val
+		histogram[lf.letter] = val
+	}
+	fmt.Println(histogram)
+
+	pos := rand.Float64() * histTotal // pick a random position across whole range
+	// walk letters until we find the letter that pos is in.
+	total := float64(0)
+	for k, v := range histogram {
+		total += v
 		if total > pos {
-			return lf.letter
+			return k
 		}
 	}
-	return ' '
+	return '-'
 }
 
 func (d *dict) GetLetterFrequency(letter rune) int {
@@ -88,27 +102,32 @@ func (d *dict) GetLetterFrequency(letter rune) int {
 	return 0
 }
 
-func (d *dict) calcLetterFrequency() {
+func (d *dict) calcLetterCount() map[rune]int {
 	countMap := map[rune]int{}
 	for _, word := range d.words {
 		for _, letter := range word {
 			countMap[letter]++
 		}
 	}
+	return countMap
+}
+
+func (d *dict) calcLetterFrequency() {
 	highestFreq := 0
-	for k, v := range countMap {
+	for k, v := range d.calcLetterCount() {
 		d.lettersFreq = append(d.lettersFreq, &letterFreq{
 			letter: k,
 			freq:   v,
 		})
-		d.lettersFreqTotal += v
 		if v > highestFreq {
 			highestFreq = v
 		}
 	}
-	// calculate bucketed rank
+	// calculate bucketed rank and normalised frequency
 	numBuckets := float64(8)
 	for _, lf := range d.lettersFreq {
 		lf.rank = int((numBuckets + 1) - ((float64(lf.freq) / float64(highestFreq)) * numBuckets))
+		lf.freqNorm = float64(lf.freq) / float64(highestFreq)
+		fmt.Println(lf)
 	}
 }
