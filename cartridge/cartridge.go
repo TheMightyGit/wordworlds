@@ -15,9 +15,11 @@ var Resources embed.FS
 const (
 	GfxBankFont = iota
 	GfxBankGfx
+	GfxBankSmallFont
 )
 const (
 	MapBankGfx = iota
+	MapBankSmallFont
 )
 const (
 	MapAreaUI = iota
@@ -41,6 +43,7 @@ const (
 	SpriteShieldProgressBar
 	SpriteButtonLetters
 	SpriteGuessWord
+	SpriteSmallFontOverlay
 
 	SpriteMousePointer = 127
 )
@@ -52,6 +55,7 @@ var (
 	baddies []*Baddie
 	ship    *Ship
 	pointer *Pointer
+	overlay *Overlay
 )
 
 type letterGfx [4]image.Point
@@ -114,6 +118,10 @@ func Start() {
 		api.SpritesGet(SpriteBaddieStart+1),
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaBaddies),
 	))
+	overlay = NewOverlay(
+		api.SpritesGet(SpriteSmallFontOverlay),
+		api.MapBanksGet(MapBankSmallFont).AllocArea(image.Point{80, 34}),
+	)
 
 	ship = NewShip(
 		api.SpritesGet(SpriteShip),
@@ -121,6 +129,7 @@ func Start() {
 		api.SpritesGet(SpritePanels),
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaPanels),
 		api.SpritesGet(SpriteUI),
+		// overlay,
 	)
 
 	pointer = NewPointer(
@@ -131,6 +140,7 @@ func Start() {
 
 	stars.Start()
 	ship.Start()
+	overlay.Start()
 	pointer.Start()
 
 	for _, b := range baddies {
@@ -144,6 +154,7 @@ func Start() {
 func Update() {
 	stars.Update()
 	ship.Update()
+	overlay.Update()
 	pointer.Update()
 	for _, b := range baddies {
 		b.Update()
