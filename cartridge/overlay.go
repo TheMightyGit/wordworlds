@@ -67,8 +67,8 @@ func (o *Overlay) Start() {
 		image.Point{19 + 1, 1},
 		image.Point{60, 3},
 	})
-	o.alertArea.StringToMap(image.Point{0, 0}, 14, 16, "Baddie #1: |||||||||||||||||||||||||")
-	o.alertArea.StringToMap(image.Point{0, 1}, 14, 16, "Baddie #2: |||||||||||||||||||||||||")
+	o.alertArea.StringToMap(image.Point{0, 0}, 14, 16, "Baddie #1: |===============            |")
+	o.alertArea.StringToMap(image.Point{0, 1}, 14, 16, "Baddie #2: |===========================|")
 
 	o.area.DrawBox(
 		image.Rectangle{
