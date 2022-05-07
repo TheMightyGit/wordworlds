@@ -71,7 +71,8 @@ func (d *dict) RandomLetterReducedByLettersInPlayHistogram(lettersInPlayHistogra
 	histogram := map[rune]float64{}
 	histTotal := float64(0)
 	for _, lf := range d.lettersFreq {
-		val := lf.freqNorm - (lettersInPlayHistogram[lf.letter] * 0.9)
+		// val := lf.freqNorm - (lettersInPlayHistogram[lf.letter] * 0.9)
+		val := lf.freqNorm * (1.0 - (lettersInPlayHistogram[lf.letter] * 0.95))
 		if val < 0 {
 			val = 0
 		}
