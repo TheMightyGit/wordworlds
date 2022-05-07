@@ -1,7 +1,6 @@
 package cartridge
 
 import (
-	"fmt"
 	"image"
 	"strings"
 
@@ -419,7 +418,7 @@ func (s *Ship) getLettersInPlayHistogram() map[rune]float64 {
 		normFreqMap[k] = float64(v) / float64(highest)
 	}
 
-	fmt.Println("getLettersInPlayHistogram: ", normFreqMap)
+	// fmt.Println("getLettersInPlayHistogram: ", normFreqMap)
 
 	return normFreqMap
 }

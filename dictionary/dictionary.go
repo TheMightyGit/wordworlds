@@ -2,7 +2,6 @@ package dictionary
 
 import (
 	_ "embed"
-	"fmt"
 	"math/rand"
 	"strings"
 )
@@ -79,7 +78,7 @@ func (d *dict) RandomLetterReducedByLettersInPlayHistogram(lettersInPlayHistogra
 		histTotal += val
 		histogram[lf.letter] = val
 	}
-	fmt.Println(histogram)
+	// fmt.Println(histogram)
 
 	pos := rand.Float64() * histTotal // pick a random position across whole range
 	// walk letters until we find the letter that pos is in.
@@ -128,6 +127,6 @@ func (d *dict) calcLetterFrequency() {
 	for _, lf := range d.lettersFreq {
 		lf.rank = int((numBuckets + 1) - ((float64(lf.freq) / float64(highestFreq)) * numBuckets))
 		lf.freqNorm = float64(lf.freq) / float64(highestFreq)
-		fmt.Println(lf)
+		// fmt.Println(lf)
 	}
 }
