@@ -32,9 +32,20 @@ const (
 const (
 	SpriteStars = iota
 	SpritePlanetsStart
-	SpritePlanetsEnd = iota + 10
+	_
+	_
+	_
+	SpritePlanetsEnd
 	SpriteBaddieStart
-	SpriteBaddieEnd = iota + 10
+	_
+	_
+	_
+	_
+	_
+	_
+	_
+	_
+	SpriteBaddieEnd
 	SpriteShip
 	SpritePanels
 	SpriteUI
@@ -122,6 +133,13 @@ func Start() {
 		api.SpritesGet(SpriteBaddieStart+1),
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaBaddies),
 	))
+	baddies = append(baddies, NewBaddie(
+		"Cargo Pod",
+		100,
+		image.Point{200, 40},
+		api.SpritesGet(SpriteBaddieStart+2),
+		api.MapBanksGet(MapBankGfx).GetArea(MapAreaBaddies),
+	))
 	overlay = NewOverlay(
 		api.SpritesGet(SpriteSmallFontOverlay),
 		api.MapBanksGet(MapBankSmallFont).AllocArea(image.Point{80, 34}),
@@ -152,7 +170,7 @@ func Start() {
 		b.Start()
 	}
 
-	overlay.AddBaddies(baddies...)
+	overlay.UpdateBaddies(baddies...)
 
 	api.SpritesSort()
 }

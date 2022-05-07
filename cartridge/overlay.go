@@ -17,7 +17,6 @@ type Overlay struct {
 	sprite        marvtypes.Sprite
 	area          marvtypes.MapBankArea
 	usedWordsArea marvtypes.MapBankArea
-	alertArea     marvtypes.MapBankArea
 	statusArea    marvtypes.MapBankArea
 	cursorPos     image.Point
 }
@@ -34,8 +33,19 @@ func (o *Overlay) AddWord(txt string) {
 	o.cursorPos.Y++
 }
 
-func (o *Overlay) AddBaddies(baddies ...*Baddie) {
-	pos := image.Point{}
+func (o *Overlay) UpdateBaddies(baddies ...*Baddie) {
+	o.area.DrawBox(
+		image.Rectangle{
+			image.Point{19, 0},
+			image.Point{60, 1 + len(baddies)},
+		},
+		outline,
+		14,
+		16,
+	)
+	o.area.StringToMap(image.Point{19 + 1 + 1, 0}, 14, 16, "Alert! ")
+
+	pos := image.Point{20, 1}
 	longestName := 0
 	for _, b := range baddies {
 		nameLen := len(b.GetName())
@@ -46,7 +56,7 @@ func (o *Overlay) AddBaddies(baddies ...*Baddie) {
 	barWidth := 39 - longestName
 	for _, b := range baddies {
 		pad := strings.Repeat(" ", longestName-len(b.GetName()))
-		o.alertArea.StringToMap(pos, 14, 16, b.GetName()+pad+" "+o.statBar(b.GetHealth(), barWidth))
+		o.area.StringToMap(pos, 14, 16, b.GetName()+pad+" "+o.statBar(b.GetHealth(), barWidth))
 		pos.Y++
 	}
 }
@@ -74,21 +84,6 @@ func (o *Overlay) Start() {
 	o.usedWordsArea = o.area.GetSubArea(image.Rectangle{
 		image.Point{1 + 1, 2 + 1},
 		image.Point{16, 12},
-	})
-
-	o.area.DrawBox(
-		image.Rectangle{
-			image.Point{19, 0},
-			image.Point{60, 3},
-		},
-		outline,
-		14,
-		16,
-	)
-	o.area.StringToMap(image.Point{19 + 1 + 1, 0}, 14, 16, "Alert! ")
-	o.alertArea = o.area.GetSubArea(image.Rectangle{
-		image.Point{19 + 1, 1},
-		image.Point{60, 3},
 	})
 
 	o.area.DrawBox(
