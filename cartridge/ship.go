@@ -2,7 +2,6 @@ package cartridge
 
 import (
 	"image"
-	"strings"
 
 	"github.com/TheMightyGit/marv/marvtypes"
 	"github.com/TheMightyGit/wordworlds/dictionary"
@@ -153,6 +152,7 @@ func (s *Ship) Start() {
 	s.spriteGuessWord.ChangePos(image.Rectangle{image.Point{0, 78}, image.Point{320, 30}})
 	s.guessWordArea = api.MapBanksGet(MapBankGfx).AllocArea(image.Point{32, 2})
 	s.spriteGuessWord.Show(GfxBankGfx, s.guessWordArea)
+	s.spriteGuessWord.ChangePalette(1)
 
 	for _, updateable := range s.updateables {
 		updateable.Start()
@@ -186,18 +186,15 @@ func (s *Ship) getGuessWord() string {
 
 func (s *Ship) updateGuessWord() {
 	word := s.getGuessWord()
-	pad := (16 - len(word)) / 2
-	if pad < 0 {
-		pad = 0
-	}
-	paddedWord := strings.Repeat(" ", pad) + word
 
 	// valid := false
 
 	s.guessWordArea.Clear(0, 0)
 	if len(word) > 0 {
 		pos := image.Point{0, 0}
-		drawText(s.guessWordArea, pos, paddedWord, 2)
+		drawText(s.guessWordArea, pos, word, 2)
+		margin := int((320.0 - (20.0 * float64(len(word)))) / 2.0)
+		s.spriteGuessWord.ChangePos(image.Rectangle{image.Point{margin, 78}, image.Point{320, 20}})
 
 		if dictionary.Dictionary.ContainsWord(word) {
 			// api.ConsolePrintln(word, " VALID")
