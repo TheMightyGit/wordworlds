@@ -152,6 +152,9 @@ func Start() {
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaPanels),
 		api.SpritesGet(SpriteUI),
 		overlay,
+		func() []*Baddie {
+			return baddies
+		},
 	)
 
 	pointer = NewPointer(
@@ -161,8 +164,7 @@ func Start() {
 	)
 
 	stars.Start()
-	ship.Start()
-	overlay.Start()
+	overlay.Start() // overlay needs to start before ship.
 	pointer.Start()
 
 	for _, b := range baddies {
@@ -171,7 +173,7 @@ func Start() {
 		b.Start()
 	}
 
-	overlay.UpdateBaddies(baddies...)
+	ship.Start()
 
 	api.SpritesSort()
 }

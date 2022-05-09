@@ -39,8 +39,9 @@ func (b *Baddie) GetHealth() float64 {
 
 func (b *Baddie) Damage(damage int) {
 	b.hitPoints -= damage
-	if b.hitPoints < 0 {
+	if b.hitPoints <= 0 {
 		b.hitPoints = 0
+		b.spriteBaddie.ChangePalette(2)
 	}
 }
 
@@ -50,8 +51,10 @@ func (b *Baddie) Start() {
 }
 
 func (b *Baddie) Update() {
-	b.spriteBaddie.ChangePos(image.Rectangle{b.pos.Add(b.baddiesOffset), image.Point{5 * 10, 4 * 10}})
-	b.baddiesOffset.Y = int(math.Sin(b.cnt/2)*10) - 5
-	b.baddiesOffset.X = int(math.Sin(b.cnt)*80) - 40
-	b.cnt += 0.01
+	if b.hitPoints > 0 {
+		b.spriteBaddie.ChangePos(image.Rectangle{b.pos.Add(b.baddiesOffset), image.Point{5 * 10, 4 * 10}})
+		b.baddiesOffset.Y = int(math.Sin(b.cnt/2)*10) - 5
+		b.baddiesOffset.X = int(math.Sin(b.cnt)*80) - 40
+		b.cnt += 0.01
+	}
 }

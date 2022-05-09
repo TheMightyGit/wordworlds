@@ -36,6 +36,8 @@ type Ship struct {
 	shieldProgressBar *ProgressBar
 
 	overlay *Overlay
+
+	getBaddies func() []*Baddie
 }
 
 func NewShip(
@@ -45,6 +47,7 @@ func NewShip(
 	areaPanels marvtypes.MapBankArea,
 	spriteUI marvtypes.Sprite,
 	overlay *Overlay,
+	getBaddies func() []*Baddie,
 ) *Ship {
 	return &Ship{
 		spriteShip:   spriteShip,
@@ -53,6 +56,7 @@ func NewShip(
 		areaPanels:   areaPanels,
 		spriteUI:     spriteUI,
 		overlay:      overlay,
+		getBaddies:   getBaddies,
 	}
 }
 
@@ -159,6 +163,8 @@ func (s *Ship) Start() {
 	}
 
 	s.updateGuessWord()
+
+	s.overlay.UpdateBaddies(s.getBaddies()...)
 }
 
 func (s *Ship) Update() {
@@ -187,8 +193,6 @@ func (s *Ship) getGuessWord() string {
 func (s *Ship) updateGuessWord() {
 	word := s.getGuessWord()
 
-	// valid := false
-
 	s.guessWordArea.Clear(0, 0)
 	if len(word) > 0 {
 		pos := image.Point{0, 0}
@@ -197,12 +201,9 @@ func (s *Ship) updateGuessWord() {
 		s.spriteGuessWord.ChangePos(image.Rectangle{image.Point{margin, 78}, image.Point{320, 20}})
 
 		if dictionary.Dictionary.ContainsWord(word) {
-			// api.ConsolePrintln(word, " VALID")
-			s.okButton.letter = 'o'
-			// valid = true
+			s.okButton.letter = 'o' // valid
 		} else {
-			// api.ConsolePrintln(word, " INVALID")
-			s.okButton.letter = ' '
+			s.okButton.letter = ' ' // not valid
 		}
 
 		s.delButton.letter = 'd'
@@ -253,6 +254,21 @@ func (s *Ship) addOkButton() *LetterButton {
 			s.shieldProgressBar.HitTarget()
 
 			if s.weaponProgressBar.CurrentPercentage() >= 0.5 {
+				damage := 50
+
+				if s.weaponProgressBar.CurrentPercentage() >= 0.75 {
+					damage *= 2
+				}
+
+				baddies := s.getBaddies()
+				for _, b := range baddies {
+					if b.hitPoints > 0 {
+						b.Damage(damage)
+						break
+					}
+				}
+				s.overlay.UpdateBaddies(baddies...)
+
 				s.weaponProgressBar.SetCurrentPercentage(0.0)
 				s.weaponProgressBar.SetTargetPercentage(0.0)
 			}
