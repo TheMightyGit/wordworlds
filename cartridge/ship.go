@@ -256,7 +256,7 @@ func (s *Ship) addOkButton() *LetterButton {
 			if s.weaponProgressBar.CurrentPercentage() >= 0.5 {
 				damage := 50
 
-				if s.weaponProgressBar.CurrentPercentage() >= 0.75 {
+				if s.weaponProgressBar.CurrentPercentage() >= 0.80 {
 					damage *= 2
 				}
 
