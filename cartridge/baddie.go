@@ -56,5 +56,6 @@ func (b *Baddie) Update() {
 		b.baddiesOffset.Y = int(math.Sin(b.cnt/2)*10) - 5
 		b.baddiesOffset.X = int(math.Sin(b.cnt)*80) - 40
 		b.cnt += 0.01
+		// b.spriteBaddie.Rotate(b.cnt)
 	}
 }
