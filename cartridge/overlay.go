@@ -40,7 +40,7 @@ func (o *Overlay) UpdateBaddies(baddies ...*Baddie) {
 			image.Point{60, 1 + len(baddies)},
 		},
 		outline,
-		14,
+		13, // darker
 		16,
 	)
 	o.area.StringToMap(image.Point{19 + 1 + 1, 0}, 14, 16, "Alert! ")
@@ -90,7 +90,7 @@ func (o *Overlay) Start() {
 			image.Point{16, 12},
 		},
 		outline,
-		14,
+		13, // darker
 		16,
 	)
 	o.area.StringToMap(image.Point{3, 2}, 14, 16, "Used Words ")
@@ -105,7 +105,7 @@ func (o *Overlay) Start() {
 			image.Point{62 + 16, 12},
 		},
 		outline,
-		14,
+		13, // darker
 		16,
 	)
 	o.area.StringToMap(image.Point{62 + 1 + 2, 2}, 14, 16, "Status ")
