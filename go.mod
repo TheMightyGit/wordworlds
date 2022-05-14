@@ -1,6 +1,6 @@
 module github.com/TheMightyGit/wordworlds
 
-go 1.17
+go 1.18
 
 replace github.com/TheMightyGit/marv => /Users/johnny/marv300
 
