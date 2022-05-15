@@ -127,14 +127,14 @@ func Start() {
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaBaddies),
 	))
 	baddies = append(baddies, NewBaddie(
-		"Fighter",
+		"Interceptor",
 		100,
 		image.Point{180, 45},
 		api.SpritesGet(SpriteBaddieStart+1),
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaBaddies),
 	))
 	baddies = append(baddies, NewBaddie(
-		"Cargo Pod",
+		"Interceptor",
 		100,
 		image.Point{200, 40},
 		api.SpritesGet(SpriteBaddieStart+2),
@@ -168,7 +168,7 @@ func Start() {
 	pointer.Start()
 
 	for _, b := range baddies {
-		b.Damage(rand.Intn(b.maxHitPoints))
+		// b.Damage(rand.Intn(b.maxHitPoints))
 		b.cnt = rand.Float64()
 		b.Start()
 	}

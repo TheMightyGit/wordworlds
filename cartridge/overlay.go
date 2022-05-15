@@ -68,7 +68,7 @@ func (o *Overlay) statBar(val float64, width int) string {
 			health = 1 // at least one char if any health remains.
 		}
 	}
-	healthBar := strings.Repeat("=", health)
+	healthBar := strings.Repeat("|", health)
 
 	if health == 0 {
 		healthBar = "dead"
@@ -76,7 +76,7 @@ func (o *Overlay) statBar(val float64, width int) string {
 	}
 
 	pad := (width - health) - 2
-	return "|" + healthBar + strings.Repeat(" ", pad) + "|"
+	return "[" + healthBar + strings.Repeat(" ", pad) + "]"
 }
 
 func (o *Overlay) Start() {
