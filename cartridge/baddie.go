@@ -45,6 +45,10 @@ func (b *Baddie) Damage(damage int) {
 	}
 }
 
+func (b *Baddie) TakeAction(s *Ship) {
+	s.Damage(10)
+}
+
 func (b *Baddie) Start() {
 	b.spriteBaddie.ChangePos(image.Rectangle{b.pos.Add(b.baddiesOffset), image.Point{5 * 10, 4 * 10}})
 	b.spriteBaddie.Show(GfxBankGfx, b.area)

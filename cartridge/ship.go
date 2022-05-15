@@ -2,6 +2,7 @@ package cartridge
 
 import (
 	"image"
+	"math"
 
 	"github.com/TheMightyGit/marv/marvtypes"
 	"github.com/TheMightyGit/wordworlds/dictionary"
@@ -182,6 +183,36 @@ func (s *Ship) OnClick(pos image.Point) bool {
 	return false
 }
 
+func (s *Ship) Damage(intAmount int) {
+	amount := float64(intAmount) / 100.0
+
+	// shield damage
+	if amount > 0 {
+		currentShield := s.shieldProgressBar.CurrentPercentage()
+		shieldDamage := math.Min(currentShield, amount)
+		if shieldDamage > 0 {
+			s.shieldProgressBar.SetCurrentPercentage(currentShield - shieldDamage)
+			s.shieldProgressBar.SetTargetPercentage(currentShield - shieldDamage)
+		}
+		amount -= shieldDamage
+	}
+
+	// hull damage
+	if amount > 0 {
+		currentHull := s.hullProgressBar.CurrentPercentage()
+		hullDamage := math.Min(currentHull, amount)
+		if hullDamage > 0 {
+			s.hullProgressBar.SetCurrentPercentage(currentHull - hullDamage)
+			s.hullProgressBar.SetTargetPercentage(currentHull - hullDamage)
+		}
+		amount -= hullDamage
+	}
+
+	if amount > 0 { // dead!
+		api.ConsolePrintln("SHIP DEAD!")
+	}
+}
+
 func (s *Ship) getGuessWord() string {
 	word := ""
 	for _, b := range s.selectedLetterButtons {
@@ -276,6 +307,12 @@ func (s *Ship) addOkButton() *LetterButton {
 			s.overlay.AddWord(s.getGuessWord())
 
 			s.removeGuessWord()
+
+			for _, b := range baddies {
+				if b.hitPoints > 0 {
+					b.TakeAction(s)
+				}
+			}
 		},
 	)
 }
