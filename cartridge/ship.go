@@ -233,14 +233,17 @@ func (s *Ship) updateGuessWord() {
 
 		if dictionary.Dictionary.ContainsWord(word) {
 			s.okButton.letter = 'o' // valid
+			s.okButton.Enable()
 		} else {
 			s.okButton.letter = ' ' // not valid
+			s.okButton.Disable()
 		}
 
 		s.delButton.letter = 'd'
 	} else {
 		s.okButton.letter = ' '
 		s.delButton.letter = ' '
+		s.okButton.Disable()
 	}
 
 	s.okButton.Start()
@@ -276,6 +279,10 @@ func (s *Ship) addOkButton() *LetterButton {
 		image.Point{29, 16},
 		'o',
 		func(lb *LetterButton) {
+			if lb.disabled {
+				return
+			}
+
 			// new letters for used buttons
 			for _, lb := range s.selectedLetterButtons {
 				lb.Shuffle()
