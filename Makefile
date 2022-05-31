@@ -14,3 +14,7 @@ lint:
 dictionary/dictionary.txt:
 	# NOTE: install aspell if not already.
 	aspell -d en dump master | aspell -l en expand | tr " " "\n" | grep -E "^[a-z]{3,}$$" | sort | uniq >$@
+
+.PHONY: build
+build:
+	$(GO) build ./cmd/wordworlds
