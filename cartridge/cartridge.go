@@ -5,7 +5,6 @@ import (
 	"image"
 	"math/rand"
 
-	"github.com/TheMightyGit/marv/marvlib"
 	"github.com/TheMightyGit/marv/marvtypes"
 )
 
@@ -60,7 +59,7 @@ const (
 )
 
 var (
-	api = marvlib.API
+	api marvtypes.MarvAPI
 
 	stars   *Stars
 	baddies []*Baddie
@@ -113,7 +112,9 @@ type Updateable interface {
 	Update()
 }
 
-func Start() {
+func Start(fooApi marvtypes.MarvAPI) {
+	api = fooApi
+
 	stars = NewStars(
 		api.SpritesGet(SpriteStars),
 		api.MapBanksGet(MapBankGfx).GetArea(MapAreaStars),
